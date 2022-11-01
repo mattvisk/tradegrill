@@ -2,7 +2,7 @@
 
 - Helps day traders gather and analyze their trading performance data.
 - Allows traders to see previous trades paired visually with intraday stock charts.
-- Utilizes custom CanvasJS and SVG charts.
+- Utilizes custom Html Canvas and SVG charts.
 
 ---
 
