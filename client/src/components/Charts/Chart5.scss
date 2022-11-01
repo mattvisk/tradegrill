@@ -1,0 +1,76 @@
+@import "../../css/Themes";
+
+
+.horzLine {
+    height:1px;
+    display:block;
+    background:#fff;
+    position: absolute;
+    width:100%;
+    z-index:9999;
+}
+
+.pro-chart {
+    position: relative;
+    .chart-container {
+        position: relative;
+        height:600px;
+        background:#111;
+        overflow: hidden;
+        .fixed {
+            position: fixed;
+        }
+        canvas {
+            position:absolute;
+        }
+        section {
+            padding: $size_4;
+            max-width: 20vw;
+            min-width: 400px;
+            margin: 0;
+            position: absolute;
+        }
+    }
+    .chart-price {
+        position:absolute;
+        z-index:2;
+        right:0;
+    }
+    .chart-header {
+        position:absolute;
+        padding:18px;
+        z-index: 3;
+        .logo-title {
+            display:flex;
+            align-items: center;
+            margin-left:-3px;
+            h1 {
+                font-size:20px;   
+                padding:0 10px 0 4px; 
+                margin:0;
+                span {
+                    display:block;
+                    color:#333;
+                    font-size:14px;
+                }
+            }
+            img {
+                margin-right:$size_1;
+                height:40px;
+                background: #fff;
+                padding: 4px;
+                border-radius:20px;
+                overflow: hidden;
+            }
+        }
+        .chart-title {
+            font-size:$size_2;
+            letter-spacing: $size_qtr;
+            display:inline;
+            color:#0c9;
+            b {
+                color:#fff;
+            }
+        }
+    }
+}

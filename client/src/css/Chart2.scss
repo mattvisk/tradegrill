@@ -1,0 +1,55 @@
+.wrapper2 {
+  background: #eee;
+  border-radius: 8px;
+
+  .chart-container2 {
+    .candleArea {
+      .line {
+        stroke: #aaa;
+        shape-rendering: crispEdges;
+      }
+      rect {
+        &.red {
+          fill: red;
+        }
+        &.green {
+          fill: #1fac42;
+        }
+      }
+    }
+
+    .grid-lines {
+      .gridLine {
+        stroke: #e3e3e3;
+        stroke-width: 1px;
+        shape-rendering: crispEdges;
+        &.light {
+          stroke: #e8e8e8;
+        }
+      }
+      .axisValue {
+        font-size: 10px;
+        fill: #aaa;
+      }
+    }
+
+    .volumeCandles {
+      rect {
+        fill: #6f6d96;
+      }
+    }
+
+    .showTrades {
+      circle {
+        &.BC {
+          fill: rgba(19, 211, 60, 0.5);
+          stroke-width: 1px;
+          stroke: rgba(0, 0, 0, 1);
+        }
+        &.SS {
+          fill: #fff;
+        }
+      }
+    }
+  }
+}

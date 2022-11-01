@@ -1,0 +1,50 @@
+// Fonts
+$font_1 : 'Kanit'; // Logos, H1, H2, etc.
+$font_2: 'Calibri'; // Text
+$font_weight_1 : 100; 
+$font_weight_2 : 500;
+
+// Sizes 
+$size_qtr : 2px;
+$size_half : 4px;
+$size_1 : 8px;
+$size_2 : 16px;
+$size_3 : 24px;
+$size_4 : 32px;
+$size_5 : 40px;
+$size_6 : 48px;
+$size_7 : 56px;
+$size_8 : 64px;
+$size_9 : 72px;
+$size_10 : 80px;
+$size_11 : 88px;
+$size_12 : 96px;
+$size_12 : 104px;
+
+// Colors
+$BG: #222;
+$BG_B: #333;
+$HEADER_BG: #542099;
+$TEXT: #fff;
+$LINK: rgb(200, 106, 255);
+$LINK_HOVER: rgb(236, 204, 255);
+$CHART_BG: rgb(39, 39, 39);
+$CHART_LINES: rgb(65, 65, 65);
+$CHART_LABELS: #aaa;
+$CHART_A: #cfa6ff;
+$CHART_B: #6d248f; // zero line
+$CHART_C: #cfa6ff;
+
+
+
+button {
+    border:1px solid #ddd;
+    // background:#0c9; 
+    background:none;   
+    font-family: $font_2;
+    padding:$size_1 $size_2;
+    border-radius:4px;
+    color:#fff;
+    font-size:16px;
+}
+

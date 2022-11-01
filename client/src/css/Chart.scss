@@ -1,0 +1,61 @@
+@import "Themes";
+
+.wrapper {
+  border-radius: 10px;
+  background: #efefef;
+  //   box-shadow: inset 0 -20px 40px rgba(0, 0, 0, 0.075);
+  padding: 18px 22px;
+  padding-right: 0;
+}
+.chart-container {
+  width: 100%;
+  height: 300px;
+
+  svg {
+    position: absolute;
+  }
+  .bar {
+    rx: 2px;
+    &.green {
+      fill: rgb(24, 187, 32);
+    }
+    &.red {
+      fill: rgb(255, 0, 0);
+    }
+  }
+
+  .volumeBar {
+    rx: 2px;
+    fill: rgb(124, 123, 161);
+  }
+
+  .line {
+    shape-rendering: crispEdges;
+    stroke: #ccc;
+    stroke-width: 1px;
+    &.open {
+      stroke: rgb(119, 117, 238);
+      display: none;
+    }
+    &.close {
+      stroke: rgb(16, 132, 241);
+      display: none;
+    }
+  }
+  .grid-lines {
+    .gridLine {
+      stroke: #e3e3e3;
+      stroke-width: 1px;
+      shape-rendering: crispEdges;
+      &.light {
+        stroke: #e8e8e8;
+      }
+    }
+    .axisValue {
+      font-size: 10px;
+      fill: #aaa;
+      &.light {
+      }
+    }
+  }
+}

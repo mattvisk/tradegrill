@@ -1,0 +1,50 @@
+@import "Themes";
+
+
+.plChart {
+  margin:50px 0 0 50px;
+}
+svg {
+  overflow: visible;
+  &.chart {
+    background-color: $CHART_BG;
+    box-shadow: inset 0 -50px 200px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    display: block;
+  }
+}
+line {
+  stroke: $CHART_A;
+  stroke-width: 1px;
+  &.background {
+    stroke: $CHART_LINES;
+    shape-rendering: crispEdges;
+  }
+  &.zero {
+    stroke: $CHART_B;
+    stroke-dasharray: 2;
+    shape-rendering: crispEdges;
+  }
+}
+circle {
+  fill: $CHART_C;
+}
+
+text {
+  shape-rendering: crispEdges;
+  font-size: 10px;
+  fill: $CHART_LABELS;
+  &.hidden {
+    display: none;
+  }
+}
+
+.dataPoint:hover {
+  .hidden {
+    display: block;
+  }
+}
+
+.react-datepicker-wrapper {
+  width:auto!important;
+}

@@ -1,0 +1,366 @@
+// @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@100;500;600&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@100;500&display=swap');
+@import "Themes";
+
+
+html {
+  overflow: -moz-scrollbars-vertical;
+  overflow-y: scroll;
+}
+body {
+  font-family: $font_2;
+  font-weight:100;
+  font-size: 14px;
+  color: $TEXT;
+  background: $BG;
+  margin: 0;
+}
+
+
+/* Layout 
+--------------------------*/
+.container {
+  //margin: $size_3;
+  margin-bottom:$size_3;
+}
+.container.center {
+  max-width:900px;
+  margin:0px auto $size_3;
+}
+
+
+/* Headings 
+--------------------------*/
+h1,
+h2,
+h3,
+h4 {
+  font-family: $font_1, sans-serif;
+  font-weight: $font_weight_2;
+  margin:0;
+  line-height:1em;
+}
+h1 {
+  font-size: $size_6;
+  color: #cecece;
+  margin:0 0 .33em;
+}
+h2 {
+  font-weight: $font_weight_2;
+  font-size: $size_3;
+  color: #3fab90;
+}
+
+/* Text
+----------------------------*/
+.center {
+  text-align: center;
+}
+.headline {
+  background: #0c9;
+  padding: 20px 10px;
+  margin: 0;
+  color: #fff;
+  text-align: center;
+  background: linear-gradient(to bottom, #2a2a2a, #202022);
+}
+a {
+  color: $LINK;
+  text-decoration: none;
+  cursor: pointer;
+}
+a:hover {
+  color: $LINK_HOVER;
+}
+
+ul {
+  margin:$size_4 0;
+  padding: 0;
+}
+li {
+  list-style:none;
+  margin:$size_1 0;
+  padding: 0;
+}
+
+.spinner {
+  text-align: center;
+  color: $HEADER_BG;
+  margin: 0 auto;
+  font-size: 20px;
+  animation-name: spin;
+  animation-duration: 800ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.flex {
+  display: flex;
+}
+
+.dashboard-header {
+  display:flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  > div > * {
+    margin-left:8px
+  }
+}
+
+.header {
+  display: flex;
+  font-family: $font_2;
+  background: $HEADER_BG;
+  align-items: center;
+  padding: 0 $size_2;
+  .logo {
+    font-size: 20px;
+    letter-spacing: 0.1em;
+    font-family: $font_1;
+    font-weight:$font_weight_2;
+    margin: $size_1 0;
+    margin-right: 30px;
+    letter-spacing: 0.05em;
+  }
+  a {
+    text-decoration: none;
+    color: #fff;
+    padding: 0 8px;
+    font-weight: $font_weight_1;
+  }
+  .right {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    margin-left: auto;
+    padding: 8px;
+    border-radius: 10px;
+    display: flex;
+    a {
+      display: flex;
+      svg {
+        margin: 2px 6px 0 0;
+        height: 11px;
+      }
+    }
+  }
+}
+
+.button {
+  background: #fff;
+  box-shadow: inset 0px 2px 2px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  font-size: 1.2em;
+  padding: 8px;
+  border-radius: 3px;
+  font-family: "Nunito", sans-serif;
+}
+
+.input {
+  background: #111;
+  box-shadow: inset 0px 2px 2px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  font-size: 1.2em;
+  color:#ddd;
+  padding: 8px;
+  border-radius: 3px;
+  font-family: "Nunito", sans-serif;
+  margin: 0 0 $size_1;
+
+}
+.input-upload {
+  input[type="file"]::file-selector-button {
+    background: #fff;
+    box-shadow: inset 0px 2px 2px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    font-size: 1.2em;
+    padding: 8px;
+    border-radius: 3px;
+    font-family: "Nunito", sans-serif;
+  }
+}
+
+.form {
+  max-width: 300px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #222;
+  background:#151515;
+  border-radius: 8px;
+  padding: 20px 40px;
+  &.wide {
+    max-width:none;
+  }
+  h1,
+  p {
+    text-align: center;
+  }
+  label {
+
+  }
+  input {
+    border: 0;
+    font-family: $font_2;
+    background: #eee;
+    height: 40px;
+    font-size: 18px;
+    
+    padding: 0 10px;
+    // position: relative;
+    // display: inline-flex;
+    background-color: transparent;
+    color: rgb(238, 238, 238);
+    // width: 100%;
+    border-width: 0px;
+    border-radius: 8px;
+    font-size: 16px;
+    appearance: none;
+    line-height:2em;
+    box-shadow: none;
+    border-width: 1px;
+    border-style: solid; 
+    border-color: rgb(59, 26, 90);
+    border-radius: 8px;
+    &:focus {
+      outline: none;
+    }
+  }
+  button {
+    display: inline-block;
+    background: $HEADER_BG;
+    border-radius: 4px;
+    border-width: 0;
+    color: #fff;
+    margin: 20px 0;
+    padding: 10px;
+    background: #0c9;
+    font-weight: bold;
+    color: #fff;
+  }
+  p.red {
+    color: #f00;
+  }
+}
+
+.grid {
+  li {
+    list-style: none;
+  }
+}
+
+
+
+.table-main {
+  width: 100%;
+  border-spacing: 0;
+  
+  thead {
+    width: 100%;
+    background-color: $HEADER_BG;
+    color: #fff;
+    font-weight: bold;
+  }
+  tbody {
+    background: $BG_B;
+    width: 100%;
+  }
+  th {
+    padding: 20px 15px;
+    text-align: center;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin:0;
+  }
+  td {
+    padding: 15px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 16px;
+    margin:0;
+    border-bottom: solid 1px rgba(0, 0, 0, 0.1);
+    input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    &.green {
+      color:#0c9;
+    }
+    &.red {
+      color:red;
+    }
+  }
+}
+
+
+.tableForm {
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  margin: 0 0 $size_5;
+  padding:$size_2;
+  font-size:18px;
+  background:rgba(0,0,0,.65);
+  text-align: center;
+  > div {
+    padding:10px $size_1 $size_2;
+    label {
+      display: block;
+      color:#888
+    }
+  }
+  input {
+    text-align: center;
+    font-family: $font_2;
+    font-size:18px;
+    width:160px;
+    box-sizing: border-box;
+    background: none;
+    color: #fff;
+    padding: 6px 0 5px;
+    border: 1px solid rgb(49, 148, 121);
+    border-width: 0 0 1px;
+    // border-radius: $size_2;
+    padding: 0 $size_2;
+    line-height:2.4em;
+  }
+}
+
+
+.chart-preview {
+  position: relative;
+  width:100%;
+  background:#111;
+  max-height: 0;
+  &.active {
+    max-height: 500px;
+    transition: max-height 0.25s ease-in;
+  }
+}
+
+
+
+
+.stats-table {
+
+    
+    background:#000;
+    display:block;
+    
+
+    td,th {
+      text-align: left;
+      padding:2px 6px;
+    }
+
+}

@@ -1,0 +1,23 @@
+$chart-height : 600px;
+
+.pl-candles-chart {
+    height:$chart-height;
+    display: flex;
+    justify-content: center;
+
+}
+.profit-loss-candles {
+    margin-top:$chart-height / 2.5;
+    display:flex;
+    direction: rtl;
+    justify-content: space-between;
+}
+
+.profit-loss-candle {
+    display:block;
+    width:4px;
+    background:#0c9;
+    line-height: 8px;
+    font-size: 8px;
+    color:#fff;
+}
