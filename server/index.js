@@ -13,6 +13,8 @@ const Axios = require('axios');
 const getUnixTime = require('date-fns/getUnixTime')
 const _ = require('lodash');
 const statistics = require('./services/statistics');
+const mysql2 = require('mysql2/promise');
+const bluebird = require('bluebird');
 require('dotenv').config();
 
 
@@ -85,9 +87,20 @@ const db = mysql.createPool({
     database: process.env.DB_NAME
 })
 
-console.log(process.env.DB_USER);
+let database = null
 
 
+async function initializeDatabase() {
+    database = await mysql2.createConnection({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        Promise: bluebird
+    });
+}
+
+initializeDatabase()
 
 
 /* Registration 
@@ -247,13 +260,13 @@ app.post('/upload-csv',function(req, res) {
         }
     })
     let upload = multer({ storage: storage }).single('file')
-    upload(req, res, function (err) {
+    upload(req, res, async function (err) {
         if (err instanceof multer.MulterError) {
             return res.status(500).json(err)
         } else if (err) {
             return res.status(500).json(err)
         }
-        InsertCsvData(req, res);
+        await InsertCsvData(req, res);
     })
 });
 
@@ -267,87 +280,84 @@ const formatDate = (date)=>{
     mysqlDate = mysqlDate.toISOString().split("T")[0];
     return mysqlDate;
 }
-const InsertCsvData = (req, res) => {
+const InsertCsvData = async (req, res) => {
     let tradesSkipped = 0;
     let tradesEntered = 0;
 
     // All Columns
     const userColumns = ["member_id"];
-    const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note" ];
+    const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note", "trade_qty", "trade_id" ];
     const allColumns = userColumns.concat(csvColumns);
     const securityQuestionMarks = allColumns.map(el=>{return "?"}).toString();
 
+    const sources = await csvtojson({
+        noheader:false,
+        headers:csvColumns
+    }).fromFile("uploads/csv/" + req.file.filename)
 
+    for (const source of sources) {
 
+        await database.beginTransaction()
 
-    // Uploaded Columns
-    csvtojson({noheader:false,headers:csvColumns}).fromFile("uploads/csv/" + req.file.filename).then(source => { 
-    
-    
-    
-        // csvtojson({noheader:false,headers:csvColumns}).fromFile("/home/tradegri/public_html/uploads/csv/" + req.file.filename).then(source => { 
-        for (let i = 0; i < source.length; i++) {
+        try {
+            const [rows] = await database.execute("SELECT * FROM trades WHERE member_id = ? AND date = ? AND ticker = ? LIMIT 1", [req.session.user.id, formatDate(source.td), source.symbol])
 
-            source[i].td = formatDate(source[i].td);
-            source[i].sd = formatDate(source[i].sd);
-            db.query("SELECT td FROM executions WHERE td = ? LIMIT 1", source[i].td, (err, result)=> {
-                result = result || [];
-                    if(result.length > 0) {
-                        tradesSkipped++;
-                        if(i==source.length-1){
-                            sendResponse();
-                        }
-                    } else {
-                        // // in prog
-                        // db.query(
-                        //     "INSERT INTO trades (member_id, date, ticker) VALUES (?,?,?)", 
-                        //     [ 
-                        //         req.session.user.id,
-                        //         source[i].date,
-                        //         source[i].symbol
-                        //     ],
-                        //     (err, result)=>{
-                        //         if(err){
-                        //             console.log(err)
-                        //             return
-                        //         } else {
-                        //             tradesEntered++;
-                        //             sendResponse();
-                        //             //console.log('Trade Entered')
-                        //         }
-                        //     }
-                        // );
-                        db.query(
-                            "INSERT INTO executions ("+allColumns.toString()+") VALUES ("+securityQuestionMarks+")",
-                            [req.session.user.id, source[i].account, source[i].td, source[i].sd, source[i].currency, source[i].type, source[i].side, source[i].symbol, source[i].qty, source[i].price, source[i].exec_time, source[i].comm, source[i].sec, source[i].taf, source[i].nscc, source[i].nasdaq, source[i].ecn_remove, source[i].ecn_add, source[i].gross_proceeds, source[i].net_proceeds, source[i].clr_broker, source[i].liq, source[i].note,],
-                            (err, result)=>{
-                                if(err){
-                                    console.log(err)
-                                    return
-                                } else {
-                                    tradesEntered++;
-                                    sendResponse();
-                                    //console.log('Trade Entered')
-                                }
-                            }
-                        );
-                    }
-                }
-                
-            );
-        }
-        sendResponse = ()=>{
-            if(tradesEntered + tradesSkipped == source.length){
-                res.send({ 
-                    message: "Upload Recieved!",
-                    trades: {
-                        skipped: tradesSkipped,
-                        entered: tradesEntered 
-                    } 
-                });
+            let trade = rows[0]
+            let trade_id = null
+
+            if (trade) {
+                trade_id = trade.id
+            } else {
+                const insertTrade = await database.execute("INSERT INTO trades(member_id, date, ticker) VALUES (?,?,?)", [req.session.user.id, formatDate(source.td), source.symbol])
+
+                trade_id = insertTrade[0].insertId
             }
+
+            await database.execute("INSERT INTO executions ("+allColumns.toString()+") VALUES ("+securityQuestionMarks+")", [
+                req.session.user.id,
+                source.account,
+                formatDate(source.td),
+                formatDate(source.sd),
+                source.currency,
+                source.type,
+                source.side,
+                source.symbol,
+                source.qty,
+                source.price,
+                source.exec_time,
+                source.comm,
+                source.sec,
+                source.taf,
+                source.nscc,
+                source.nasdaq,
+                source.ecn_remove,
+                source.ecn_add,
+                source.gross_proceeds,
+                source.net_proceeds,
+                source.clr_broker,
+                source.liq,
+                source.note,
+                0,
+                trade_id
+            ])
+
+            tradesEntered++
+        } catch (e) {
+            console.error('Failed to upload CSV Error : ', e)
+            database.rollback()
+
+            return res.send({
+                message: "Upload failed"
+            }, 500)
         }
-    }); 
+    }
+
+    res.send({
+        message: "Upload Recieved!",
+        trades: {
+            entered: tradesEntered - 1
+        }
+    })
 }
 
 
