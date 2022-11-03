@@ -310,9 +310,9 @@ const InsertCsvData = async (req, res) => {
             } else {
                 trade_id = previousExecution.trade_id
                 if(source.side == 'B' || source.side == 'SS'){
-                    trade_qty = +previousExecution.trade_qty + Number(source.qty);
+                    trade_qty = previousExecution.trade_qty + Number(source.qty);
                 } else {
-                    trade_qty = +previousExecution.trade_qty - Number(source.qty);
+                    trade_qty = previousExecution.trade_qty - Number(source.qty);
                 }
             }
 
@@ -345,7 +345,6 @@ const InsertCsvData = async (req, res) => {
             ])
             console.log("insert execution", trade_id, source.symbol, formatDate(source.td), source.exec_time, source.side, source.qty, "=", trade_qty)
 
-            tradesEntered++
         } catch (e) {
             console.error('Failed to upload CSV Error : ', e)
             database.rollback()
@@ -353,18 +352,13 @@ const InsertCsvData = async (req, res) => {
                 message: "Upload failed"
             }, 500)
         }
-        console.log("complete");
     }
-
-
     res.send({
         message: "Upload Recieved!",
         trades: {
             entered: tradesEntered - 1
         }
     })
-
-
 }
 
 
