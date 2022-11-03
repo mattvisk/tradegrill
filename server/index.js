@@ -286,7 +286,7 @@ const InsertCsvData = async (req, res) => {
 
     // All Columns
     const userColumns = ["member_id"];
-    const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note", "trade_qty", "trade_id" ];
+    const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note", "trade_qty", "trade_id"];
     const allColumns = userColumns.concat(csvColumns);
     const securityQuestionMarks = allColumns.map(el=>{return "?"}).toString();
 
@@ -296,22 +296,37 @@ const InsertCsvData = async (req, res) => {
     }).fromFile("uploads/csv/" + req.file.filename)
 
     for (const source of sources) {
-
         await database.beginTransaction()
-
         try {
-            const [rows] = await database.execute("SELECT * FROM trades WHERE member_id = ? AND date = ? AND ticker = ? LIMIT 1", [req.session.user.id, formatDate(source.td), source.symbol])
+            // const [rows] = await database.execute("SELECT * FROM trades WHERE symbol = ? LIMIT 1 ORDER BY date_in DESC", [req.session.user.id, formatDate(source.td), source.symbol])
+            // let trade = rows[0]
+            // let trade_id = null
+            // if (trade) {
+            //     trade_id = trade.id
+            // } else {
+            //     const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol) VALUES (?,?,?)", [req.session.user.id, formatDate(source.td), source.symbol])
+            //     trade_id = insertTrade[0].insertId
 
-            let trade = rows[0]
-            let trade_id = null
+            //     console.log('insert new trade', source.symbol)
+            // }
+            let trade_qty = 0
+            let trade_id = 0
 
-            if (trade) {
-                trade_id = trade.id
-            } else {
-                const insertTrade = await database.execute("INSERT INTO trades(member_id, date, ticker) VALUES (?,?,?)", [req.session.user.id, formatDate(source.td), source.symbol])
-
+            const [rows] = await database.execute("SELECT * FROM executions WHERE member_id = ? AND symbol = ? ORDER BY id DESC LIMIT 1", [req.session.user.id, source.symbol])
+            let previousExecution = rows[0]
+            if(!previousExecution || previousExecution.trade_qty == 0){
+                const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol) VALUES (?,?,?)", [req.session.user.id, formatDate(source.td), source.symbol])
                 trade_id = insertTrade[0].insertId
+                trade_qty = source.qty
+            } else {
+                trade_id = previousExecution.trade_id
+                if(source.side == 'B' || source.side == 'SS'){
+                    trade_qty = +previousExecution.trade_qty + Number(source.qty);
+                } else {
+                    trade_qty = +previousExecution.trade_qty - Number(source.qty);
+                }
             }
+
 
             await database.execute("INSERT INTO executions ("+allColumns.toString()+") VALUES ("+securityQuestionMarks+")", [
                 req.session.user.id,
@@ -337,20 +352,21 @@ const InsertCsvData = async (req, res) => {
                 source.clr_broker,
                 source.liq,
                 source.note,
-                0,
+                trade_qty,
                 trade_id
             ])
-
+            console.log("insert execution", trade_id, source.symbol, source.side, source.qty, "=", trade_qty)
             tradesEntered++
         } catch (e) {
             console.error('Failed to upload CSV Error : ', e)
             database.rollback()
-
             return res.send({
                 message: "Upload failed"
             }, 500)
         }
+        console.log("complete");
     }
+
 
     res.send({
         message: "Upload Recieved!",
@@ -358,6 +374,8 @@ const InsertCsvData = async (req, res) => {
             entered: tradesEntered - 1
         }
     })
+
+
 }
 
 
@@ -552,6 +570,12 @@ app.post("/trades", (req, res) => {
 --------------------------------------------*/
 app.get("/deleteTrades", (req, res) => {
     db.query("DELETE FROM executions WHERE member_id = ?",
+        req.session.user.id,
+        (err, result) => { if(err) {res.send({ err: err })}
+            console.log(result);
+        } 
+    );
+    db.query("DELETE FROM trades WHERE member_id = ?",
         req.session.user.id,
         (err, result) => { if(err) {res.send({ err: err })}
             console.log(result);
