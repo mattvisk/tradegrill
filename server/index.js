@@ -281,23 +281,24 @@ const formatDate = (date)=>{
     return mysqlDate;
 }
 const InsertCsvData = async (req, res) => {
-    let tradesSkipped = 0;
-    let tradesEntered = 0;
+    
+    await database.beginTransaction()
+    try {
+        let tradesSkipped = 0;
+        let tradesEntered = 0;
 
-    // All Columns
-    const userColumns = ["member_id"];
-    const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note", "trade_qty", "trade_id"];
-    const allColumns = userColumns.concat(csvColumns);
-    const securityQuestionMarks = allColumns.map(el=>{return "?"}).toString();
+        // All Columns
+        const userColumns = ["member_id"];
+        const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note", "trade_qty", "trade_id"];
+        const allColumns = userColumns.concat(csvColumns);
+        const securityQuestionMarks = allColumns.map(el=>{return "?"}).toString();
 
-    const sources = await csvtojson({
-        noheader:false,
-        headers:csvColumns
-    }).fromFile("uploads/csv/" + req.file.filename)
+        const sources = await csvtojson({
+            noheader:false,
+            headers:csvColumns
+        }).fromFile("uploads/csv/" + req.file.filename)
 
-    for (const source of sources) {
-        await database.beginTransaction()
-        try {
+        for (const source of sources) {
             let trade_qty = 0
             let trade_id = 0
 
@@ -345,20 +346,25 @@ const InsertCsvData = async (req, res) => {
             ])
             console.log("insert execution", trade_id, source.symbol, formatDate(source.td), source.exec_time, source.side, source.qty, "=", trade_qty)
 
-        } catch (e) {
-            console.error('Failed to upload CSV Error : ', e)
-            database.rollback()
-            return res.send({
-                message: "Upload failed"
-            }, 500)
+            tradesEntered++
         }
+
+        await database.commit()
+
+        res.send({
+            message: "Upload Recieved!",
+            trades: {
+                entered: tradesEntered
+            }
+        })
+    
+    } catch (e) {
+        console.error('Failed to upload CSV Error : ', e)
+        database.rollback()
+        return res.send({
+            message: "Upload failed"
+        }, 500)
     }
-    res.send({
-        message: "Upload Recieved!",
-        trades: {
-            entered: tradesEntered - 1
-        }
-    })
 }
 
 
