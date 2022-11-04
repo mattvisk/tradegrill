@@ -281,34 +281,24 @@ const formatDate = (date)=>{
     return mysqlDate;
 }
 const InsertCsvData = async (req, res) => {
-    let tradesSkipped = 0;
-    let tradesEntered = 0;
+    
+    await database.beginTransaction()
+    try {
+        let tradesSkipped = 0;
+        let tradesEntered = 0;
 
-    // All Columns
-    const userColumns = ["member_id"];
-    const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note", "trade_qty", "trade_id"];
-    const allColumns = userColumns.concat(csvColumns);
-    const securityQuestionMarks = allColumns.map(el=>{return "?"}).toString();
+        // All Columns
+        const userColumns = ["member_id"];
+        const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note", "trade_qty", "trade_id"];
+        const allColumns = userColumns.concat(csvColumns);
+        const securityQuestionMarks = allColumns.map(el=>{return "?"}).toString();
 
-    const sources = await csvtojson({
-        noheader:false,
-        headers:csvColumns
-    }).fromFile("uploads/csv/" + req.file.filename)
+        const sources = await csvtojson({
+            noheader:false,
+            headers:csvColumns
+        }).fromFile("uploads/csv/" + req.file.filename)
 
-    for (const source of sources) {
-        await database.beginTransaction()
-        try {
-            // const [rows] = await database.execute("SELECT * FROM trades WHERE symbol = ? LIMIT 1 ORDER BY date_in DESC", [req.session.user.id, formatDate(source.td), source.symbol])
-            // let trade = rows[0]
-            // let trade_id = null
-            // if (trade) {
-            //     trade_id = trade.id
-            // } else {
-            //     const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol) VALUES (?,?,?)", [req.session.user.id, formatDate(source.td), source.symbol])
-            //     trade_id = insertTrade[0].insertId
-
-            //     console.log('insert new trade', source.symbol)
-            // }
+        for (const source of sources) {
             let trade_qty = 0
             let trade_id = 0
 
@@ -321,12 +311,11 @@ const InsertCsvData = async (req, res) => {
             } else {
                 trade_id = previousExecution.trade_id
                 if(source.side == 'B' || source.side == 'SS'){
-                    trade_qty = +previousExecution.trade_qty + Number(source.qty);
+                    trade_qty = previousExecution.trade_qty + Number(source.qty);
                 } else {
-                    trade_qty = +previousExecution.trade_qty - Number(source.qty);
+                    trade_qty = previousExecution.trade_qty - Number(source.qty);
                 }
             }
-
 
             await database.execute("INSERT INTO executions ("+allColumns.toString()+") VALUES ("+securityQuestionMarks+")", [
                 req.session.user.id,
@@ -355,27 +344,27 @@ const InsertCsvData = async (req, res) => {
                 trade_qty,
                 trade_id
             ])
-            console.log("insert execution", trade_id, source.symbol, source.side, source.qty, "=", trade_qty)
+            console.log("insert execution", trade_id, source.symbol, formatDate(source.td), source.exec_time, source.side, source.qty, "=", trade_qty)
+
             tradesEntered++
-        } catch (e) {
-            console.error('Failed to upload CSV Error : ', e)
-            database.rollback()
-            return res.send({
-                message: "Upload failed"
-            }, 500)
         }
-        console.log("complete");
+
+        await database.commit()
+
+        res.send({
+            message: "Upload Recieved!",
+            trades: {
+                entered: tradesEntered
+            }
+        })
+    
+    } catch (e) {
+        console.error('Failed to upload CSV Error : ', e)
+        database.rollback()
+        return res.send({
+            message: "Upload failed"
+        }, 500)
     }
-
-
-    res.send({
-        message: "Upload Recieved!",
-        trades: {
-            entered: tradesEntered - 1
-        }
-    })
-
-
 }
 
 
@@ -397,25 +386,6 @@ app.post("/dashboardGet", (req, res) => {
                 // Default Values
                 let totalGrossProceeds = 0;
                 let runningProfit = 0;    
-
-                // // Group Exectutions by Day and Get dayTotal
-                // const resultByDay = _.groupBy(result, e => e.tdFormatted.substring(0, 10));
-                // const daySummaryArr = _.map(resultByDay, (items, date) => {
-                //     let sumDayProfit = _.sum(
-                //         items.map((e)=>{
-                //             let num = (e.side=="BC" || e.side=="B" ? e.qty * e.price * -1 : e.qty * e.price);
-                //             totalGrossProceeds += num;
-                //             return num;
-                //         })
-                //     )
-                //     return { 
-                //         date: date,
-                //         symbols: _.uniq(items.map(e=>e.symbol)),
-                //         profit: sumDayProfit,
-                //         executions: items,
-                //         showChart: 'hi'
-                //     }
-                // });
 
                 // Group Exectutions by Day and Get dayTotal
                 const resultByDay = _.groupBy(result, e => e.tdFormatted.substring(0, 10));
