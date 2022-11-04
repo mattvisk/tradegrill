@@ -101,24 +101,28 @@ const Trades = (props) => {
             <table>
               <thead>
                 <tr>
+                  <th>Trade ID</th>
                   <th>Symbol</th>
                   <th>Time</th>
                   <th>Side</th>
                   <th>Price</th>
                   <td>Qty</td>
                   <th>Running Qty</th>
+                  <th>Trade Qty</th>
                 </tr>
               </thead>
               <tbody>
                 {tradeData.data.map((e, i) => {
                   return (
                     <tr>
+                      <td>{e.trade_id}</td>
                       <td>{e.symbol}</td>
                       <td>{e.exec_time}</td>
                       <td className={e.side == 'SS' || e.side == 'S' ? 'red':'green'}>{e.side=='SS' || e.side=='S' ? "SELL" : "BUY"}</td>
                       <td>{e.price}</td>
                       <td>{e.qty}</td>
                       <td>{e.runningQty}</td>
+                      <td>{e.trade_qty}</td>
                     </tr>
                   );
                 })}

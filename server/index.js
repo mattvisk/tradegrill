@@ -528,12 +528,14 @@ app.post("/trades", (req, res) => {
                     // do something
                 }
                 return { 
+                    trade_id: e[0].trade_id,
                     symbol : e[0].symbol,
                     exec_time: e[0].exec_time,
                     price: e[0].price, ///////////////////////////// PRICE IS Wrong. should be avg. not index 0.
                     qty: totalQty,
                     side: e[0].side,
                     runningQty: runningQty,
+                    trade_qty: e[0].trade_qty,
 
                     
                     // date in 
