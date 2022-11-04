@@ -89,19 +89,27 @@ const db = mysql.createPool({
 
 let database = null
 
-
 async function initializeDatabase() {
-    database = await mysql2.createConnection({
+    const connection = await mysql2.createConnection({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
         Promise: bluebird
-    });
+    })
+
+    return connection
 }
 
-initializeDatabase()
+const getDatabaseConnection = async () => {
+    if (!database || database?.connection?._closing) {
+        database = await initializeDatabase()
+    }
 
+    return database
+}
+
+getDatabaseConnection()
 
 /* Registration 
 --------------------------------------------
