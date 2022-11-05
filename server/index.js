@@ -82,6 +82,7 @@ app.use(session({
 --------------------------------------------*/
 const db = mysql.createPool({
     host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
@@ -92,6 +93,7 @@ let database = null
 async function initializeDatabase() {
     const connection = await mysql2.createConnection({
         host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
@@ -310,7 +312,7 @@ const InsertCsvData = async (req, res) => {
             const [rows] = await database.execute("SELECT * FROM executions WHERE member_id = ? AND symbol = ? ORDER BY id DESC LIMIT 1", [req.session.user.id, source.symbol])
             let previousExecution = rows[0]
 
-            // New Trade
+            // Create New Trade...
             if(!previousExecution || previousExecution.trade_qty == 0){
                 const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol) VALUES (?,?,?)", 
                     [req.session.user.id, formatDate(source.td), source.symbol])
@@ -318,7 +320,7 @@ const InsertCsvData = async (req, res) => {
                 trade_qty = source.qty
                 rolling_gross_proceeds = Number(source.gross_proceeds);
 
-            // Resume Trade
+            // Use Existing Trade...
             } else {
                 trade_id = previousExecution.trade_id
                 trade_qty = previousExecution.trade_qty + Number(source.qty) * (source.side == 'B' || source.side == 'SS' ? 1 : -1);

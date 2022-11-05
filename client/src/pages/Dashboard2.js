@@ -32,7 +32,6 @@ const Dashboard2 = ({user})=>{
                     <td>{execution.trade_id}</td>
                     <td>{execution.symbol}</td>
                     <td>{execution.profit_loss}</td>
-                    {/* <td>{execution.trade_qty}</td> */}
                 </tr>
             )}
         </table>

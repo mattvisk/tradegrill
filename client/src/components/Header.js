@@ -33,7 +33,8 @@ const Header = ({user}) => {
             }
             </div>            
                 { user && <Link to="/dashboard">Dashboard</Link> }
-                { user && <Link to="/statistics">Statistics</Link> }
+                { user && <Link to="/dashboard-new">Dashboard2</Link> }
+                {/* { user && <Link to="/statistics">Statistics</Link> } */}
                 { user && <><input value={searchValue} onKeyUp={onKeyUp} onChange={(e)=>{setSearchValue(e.target.value)}}></input><button type="submit" onClick={submitSearch}>Search</button></> }
             <div className="right">
                 { user && <Link to="/profile"><FaUser />{user.username}</Link> }
