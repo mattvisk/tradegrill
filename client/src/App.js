@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Header from "./components/Header";
 import Profile from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
+import Dashboard2 from "./pages/Dashboard2";
 import Trade from "./components/Trade";
 import Logout from "./pages/Logout";
 import Statistics from "./pages/Statistics";
@@ -60,6 +61,9 @@ function App() {
           </Route>
           <Route exact path="/dashboard">
             {user ? <Dashboard user={user} /> : <LoginRedirect />}
+          </Route>
+          <Route exact path="/dashboard-new">
+            <Dashboard2 user={user} />
           </Route>
           <Route exact path="/trades/:urlSymbol/:urlDate/:urlDays">
             <Trade user={user} />

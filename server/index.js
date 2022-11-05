@@ -289,15 +289,11 @@ const formatDate = (date)=>{
     return mysqlDate;
 }
 const InsertCsvData = async (req, res) => {
-    
     await database.beginTransaction()
     try {
-        let tradesSkipped = 0;
-        let tradesEntered = 0;
-
         // All Columns
         const userColumns = ["member_id"];
-        const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note", "trade_qty", "trade_id"];
+        const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note", "trade_qty", "trade_id", "rolling_gross_proceeds"];
         const allColumns = userColumns.concat(csvColumns);
         const securityQuestionMarks = allColumns.map(el=>{return "?"}).toString();
 
@@ -310,21 +306,32 @@ const InsertCsvData = async (req, res) => {
             let trade_qty = 0
             let trade_id = 0
 
+            // Check Previous Execution
             const [rows] = await database.execute("SELECT * FROM executions WHERE member_id = ? AND symbol = ? ORDER BY id DESC LIMIT 1", [req.session.user.id, source.symbol])
             let previousExecution = rows[0]
+
+            // New Trade
             if(!previousExecution || previousExecution.trade_qty == 0){
-                const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol) VALUES (?,?,?)", [req.session.user.id, formatDate(source.td), source.symbol])
+                const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol) VALUES (?,?,?)", 
+                    [req.session.user.id, formatDate(source.td), source.symbol])
                 trade_id = insertTrade[0].insertId
                 trade_qty = source.qty
+                rolling_gross_proceeds = Number(source.gross_proceeds);
+
+            // Resume Trade
             } else {
                 trade_id = previousExecution.trade_id
-                if(source.side == 'B' || source.side == 'SS'){
-                    trade_qty = previousExecution.trade_qty + Number(source.qty);
-                } else {
-                    trade_qty = previousExecution.trade_qty - Number(source.qty);
+                trade_qty = previousExecution.trade_qty + Number(source.qty) * (source.side == 'B' || source.side == 'SS' ? 1 : -1);
+                rolling_gross_proceeds = Number(previousExecution.rolling_gross_proceeds) + Number(source.gross_proceeds);
+
+                // Complete Trade
+                if(trade_qty == 0){
+                    await database.execute("UPDATE trades SET profit_loss = ?, date_out = ? WHERE id = ? AND member_id = ?", 
+                    [rolling_gross_proceeds, formatDate(source.td), trade_id, req.session.user.id])
                 }
             }
 
+            // Insert Executions
             await database.execute("INSERT INTO executions ("+allColumns.toString()+") VALUES ("+securityQuestionMarks+")", [
                 req.session.user.id,
                 source.account,
@@ -350,20 +357,21 @@ const InsertCsvData = async (req, res) => {
                 source.liq,
                 source.note,
                 trade_qty,
-                trade_id
+                trade_id,
+                rolling_gross_proceeds
             ])
-            console.log("insert execution", trade_id, source.symbol, formatDate(source.td), source.exec_time, source.side, source.qty, "=", trade_qty)
 
-            tradesEntered++
+
+            // Test
+            console.log("insert execution", trade_id, source.symbol, formatDate(source.td), source.exec_time, source.side, source.qty, "=", trade_qty, source.gross_proceeds, '=', rolling_gross_proceeds)
+
+            
         }
 
         await database.commit()
 
         res.send({
-            message: "Upload Recieved!",
-            trades: {
-                entered: tradesEntered
-            }
+            message: "Upload Received!"
         })
     
     } catch (e) {
@@ -376,6 +384,12 @@ const InsertCsvData = async (req, res) => {
 }
 
 
+/* Dashboard 2 (test)
+--------------------------------------------
+--------------------------------------------*/
+app.get('/get-trades', (req, res) => {
+    db.query("SELECT * FROM trades WHERE member_id = ? ORDER BY id DESC", [req.session.user.id], (err, result) => res.send(result))
+}) 
 
 
 
@@ -407,8 +421,7 @@ app.post("/dashboardGet", (req, res) => {
                             return num;
                         })
                     )
-                    // Return Day Trade
-                    
+                    // Return Day Trade                    
                     return { 
                         date: date,
                         symbols: _.uniq(items.map(e=>e.symbol)),
@@ -417,15 +430,6 @@ app.post("/dashboardGet", (req, res) => {
                         showChart: 'hi'
                     }
                 });
-
-                // {date: "10-06-2022", symbols: "PEGY", profit: 1933.503600000003,…}
-                // {date: "10-06-2022", symbols: "FNGR", profit: 1933.503600000003,…}
-                // {date: "10-06-2022", symbols: "PEGY"], profit: 1933.503600000003,…}
-                // {date: "10-05-2022", symbols: ["KITT", "GTII", "PEGY"], profit: 241.41679999999997,…}
-                // {date: "10-04-2022", symbols: ["AERC"], profit: -1550.1250000000027,…}
-                // {date: "10-03-2022", symbols: ["FNGR", "GTII"], profit: 2125.8256999999985,…}
-
-
                 
                 // Create Reveresed Running Profit Array (with Running Profit)
                 let calcRunningProfit = 0;
@@ -461,28 +465,11 @@ app.post("/dashboardGet", (req, res) => {
 
 
 
-/* Exectutions -------------*/
-// return json object with all executions grouped by trades (qty driven), entry_date, exit_date, ticker
 
 
 /* Get Trades
 --------------------------------------------
 --------------------------------------------
-
-
-symbol
-pattern
-date in
-date out
-pice in
-price out
-profit / loss 
-win / l
-
-Get these into inputs in a form...
-
-
-
 -------------------------------------------- */
 app.post("/trades", (req, res) => {    
     db.query("SELECT *, DATE_FORMAT(td,'%m-%d-%Y') AS tdFormatted, DATE_FORMAT(sd,'%d/%m/%Y') AS sd2 FROM executions WHERE member_id = ? AND symbol=? AND td = ? ORDER BY exec_time", 
@@ -514,14 +501,6 @@ app.post("/trades", (req, res) => {
                     side: e[0].side,
                     runningQty: runningQty,
                     trade_qty: e[0].trade_qty,
-
-                    
-                    // date in 
-                    // date out
-                    // pice in
-                    // price out
-                    // profit / loss 
-                    // win / l
                 }
             })
 
