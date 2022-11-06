@@ -1,6 +1,5 @@
-// @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@100;500;600&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@100;500&display=swap');
 @import "Themes";
+@import "Table";
 
 
 html {
@@ -122,27 +121,33 @@ li {
   background: $HEADER_BG;
   align-items: center;
   padding: 0 $size_2;
+  margin-bottom:$size_4;
   .logo {
-    font-size: 20px;
+    font-size: 22px;
     letter-spacing: 0.1em;
     font-family: $font_1;
     font-weight:$font_weight_2;
-    margin: $size_1 0;
-    margin-right: 30px;
+    margin: $size_half 0;
+    margin-right: $size_2;
     letter-spacing: 0.05em;
   }
   a {
     text-decoration: none;
     color: #fff;
     padding: 0 8px;
+    margin-right:$size_1;
     font-weight: $font_weight_1;
+    padding:10px;
+    border-radius: 4px;;
+    &:hover {
+      background-color:rgba(0,0,0,.1);
+    }
+    &.active {
+      background-color:rgba(0,0,0,.2);
+    }
   }
   .right {
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 4px;
     margin-left: auto;
-    padding: 8px;
-    border-radius: 10px;
     display: flex;
     a {
       display: flex;
@@ -254,6 +259,13 @@ li {
 .grid {
   li {
     list-style: none;
+  }
+}
+
+
+.table-a {
+  td.txt-right {
+    text-align:right;
   }
 }
 

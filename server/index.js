@@ -390,7 +390,7 @@ const InsertCsvData = async (req, res) => {
 --------------------------------------------
 --------------------------------------------*/
 app.get('/get-trades', (req, res) => {
-    db.query("SELECT * FROM trades WHERE member_id = ? ORDER BY id DESC", [req.session.user.id], (err, result) => res.send(result))
+    db.query("SELECT *, DATE_FORMAT(date_in,'%d/%m/%Y') AS date_in_nice, DATE_FORMAT(date_out,'%d/%m/%Y') AS date_out_nice  FROM trades WHERE member_id = ? ORDER BY id DESC", [req.session.user.id], (err, result) => res.send(result))
 }) 
 
 

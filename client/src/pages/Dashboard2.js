@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import Axios from 'axios';
-import UploadTrades from '../components/UploadTrades';
-import { FaSpinner} from 'react-icons/fa';
-import DatePicker from "react-datepicker";
-import Format from 'date-fns/format';
-import PLChart from '../components/PLChart';
-import ProfitLossCandles from '../components/Charts/ProfitLossCandles/ProfitLossCandles';
-import TableTrades from '../components/Tables/TableTrades';
-import Trades from '../components/Trade2';
-import "react-datepicker/dist/react-datepicker.css";
+import { format } from 'date-fns'
 const Dashboard2 = ({user})=>{    
     
 
@@ -26,12 +18,19 @@ const Dashboard2 = ({user})=>{
     }
     
     return (
-        <table>
+        <table className="table-a">
+            <tr>
+                <th>Symbol</th>
+                <th>Date In</th>
+                <th>Date Out</th>
+                <th>Profit/Loss</th>
+            </tr>
             { tradeData && tradeData.map((execution,i) => 
                 <tr>
-                    <td>{execution.trade_id}</td>
                     <td>{execution.symbol}</td>
-                    <td>{execution.profit_loss}</td>
+                    <td>{execution.date_in_nice}</td>
+                    <td>{execution.date_out_nice}</td>
+                    <td>{execution.profit_loss.toFixed(2)}</td>
                 </tr>
             )}
         </table>
