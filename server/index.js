@@ -363,10 +363,8 @@ const InsertCsvData = async (req, res) => {
                 rolling_gross_proceeds
             ])
 
-
             // Test
             console.log("insert execution", trade_id, source.symbol, formatDate(source.td), source.exec_time, source.side, source.qty, "=", trade_qty, source.gross_proceeds, '=', rolling_gross_proceeds)
-
             
         }
 
@@ -386,11 +384,34 @@ const InsertCsvData = async (req, res) => {
 }
 
 
-/* Dashboard 2 (test)
+/* Trades
 --------------------------------------------
 --------------------------------------------*/
 app.get('/get-trades', (req, res) => {
-    db.query("SELECT *, DATE_FORMAT(date_in,'%d/%m/%Y') AS date_in_nice, DATE_FORMAT(date_out,'%d/%m/%Y') AS date_out_nice  FROM trades WHERE member_id = ? ORDER BY id DESC", [req.session.user.id], (err, result) => res.send(result))
+    db.query("SELECT *, DATE_FORMAT(date_in,'%m/%d/%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m/%d/%Y') AS date_out_nice  FROM trades WHERE member_id = ? ORDER BY id DESC", 
+    [1], (err, trades) => {
+
+        // Add Date-Symbol Key to trades arr
+        trades = trades.map(trade => {
+            trade.key = trade.symbol+'_'+trade.date_out_nice;
+            return trade;
+        })
+
+        let tradesGrouped = _.groupBy(trades, trade => trade.key);
+        tradesGrouped = _.map(tradesGrouped, (trades) => {
+            return { 
+                date: trades[0].date_out_nice,
+                symbol: trades[0].symbol,
+                profit_loss: _.sumBy(trades, trade => trade.profit_loss),
+                trades: trades
+            }
+        })
+
+        res.send({
+            trades: trades,
+            tradesGrouped: tradesGrouped
+        })
+    })
 }) 
 
 

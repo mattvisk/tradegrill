@@ -28,7 +28,7 @@ function App() {
     const isLoggedIn = () => {
       // Axios.get("http://tradegrill.com:3001/isLoggedIn").then((response)=> {
       Axios.get(
-        "http://" + window.location.hostname + ":3001" + "/isLoggedIn"
+        "http://" + window.location.hostname + ":3001/isLoggedIn"
       ).then((response) => {
         if (response.data.username) {
           setUser(response.data);
@@ -48,7 +48,7 @@ function App() {
   return (
     <Router>
       <Header user={user} setUser={setUser} />
-      <div class="container">
+      <div className="container">
         <Switch>
           <Route exact path="/" />
           <Route exact path="/register" component={Register} />
@@ -62,7 +62,7 @@ function App() {
           <Route exact path="/dashboard">
             {user ? <Dashboard user={user} /> : <LoginRedirect />}
           </Route>
-          <Route exact path="/dashboard-new">
+          <Route exact path="/all-trades">
             <Dashboard2 user={user} />
           </Route>
           <Route exact path="/trades/:urlSymbol/:urlDate/:urlDays">

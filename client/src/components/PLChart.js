@@ -71,7 +71,7 @@ const PLChart = ({ data }) => {
   });
 
   return (
-    <div class="plChart">
+    <div className="plChart">
     <svg
       className="chart"
       height={chartSettings.height}

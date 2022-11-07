@@ -33,7 +33,7 @@ const Header = ({user}) => {
             { user && 
                 <div>
                     <NavLink to="/dashboard">Dashboard</NavLink>
-                    <NavLink to="/dashboard-new">Overview</NavLink>
+                    <NavLink to="/all-trades">Trades</NavLink>
                 </div>
             }
             { user && 

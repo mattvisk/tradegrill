@@ -4,7 +4,7 @@ const TableTrades = ({data})=>{
             <div className='container center'>
                 <h2 className="center headline">P/L: ${data.totalGrossProceeds.toFixed(2)}</h2>
                 <div className="mv-table">
-                    <table class="table-main">
+                    <table className="table-main">
                         <thead>
                             <tr>
                                 <th>Symbols</th>

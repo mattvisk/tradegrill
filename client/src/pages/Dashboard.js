@@ -4,10 +4,9 @@ import UploadTrades from '../components/UploadTrades';
 import { FaSpinner} from 'react-icons/fa';
 import DatePicker from "react-datepicker";
 import Format from 'date-fns/format';
-import PLChart from '../components/PLChart';
 import ProfitLossCandles from '../components/Charts/ProfitLossCandles/ProfitLossCandles';
 import TableTrades from '../components/Tables/TableTrades';
-import Trades from '../components/Trade2';
+import { Link } from 'react-router-dom';
 import "react-datepicker/dist/react-datepicker.css";
 const Dashboard = ({user})=>{    
     let [tradeData, setTradeData ] = useState(false);
@@ -49,7 +48,7 @@ const Dashboard = ({user})=>{
 
     let getOverview = ()=>{
         setLoading(true);
-        Axios.post("http://"+window.location.hostname+":3001"+"/dashboardGet", {
+        Axios.post("http://"+window.location.hostname+":3001/dashboardGet", {
                 'startDate': Format(startDate, 'yyyy-MM-dd'), 
                 'endDate': Format(endDate, 'yyyy-MM-dd')
             })
@@ -65,11 +64,11 @@ const Dashboard = ({user})=>{
         <>
             <div className="dashboard-header">                
                 <div>
-                    <a onClick={changeDateAll}>All Time</a>
-                    <a onClick={changeDate2020}>2020</a>
-                    <a onClick={changeDate2021}>2021</a>
-                    <a onClick={changeDate2022}>2022</a>
-                    <a onClick={changeDateCustom}>Custom</a>
+                    <Link onClick={changeDateAll}>All Time</Link>
+                    <Link onClick={changeDate2020}>2020</Link>
+                    <Link onClick={changeDate2021}>2021</Link>
+                    <Link onClick={changeDate2022}>2022</Link>
+                    <Link onClick={changeDateCustom}>Custom</Link>
                     { showCustom && <>
                     <DatePicker className="input" selected={startDate} onChange={(date) => setStartDate(date)} />
                     <DatePicker className="input" selected={endDate} onChange={(date) => setEndDate(date)} />
