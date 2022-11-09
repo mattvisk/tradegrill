@@ -391,14 +391,28 @@ app.get('/get-trades', (req, res) => {
     db.query("SELECT *, DATE_FORMAT(date_in,'%m/%d/%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m/%d/%Y') AS date_out_nice  FROM trades WHERE member_id = ? ORDER BY id DESC", 
     [1], (err, trades) => {
 
-        // Add Date-Symbol Key to trades arr
+
+        /* Group Trades into Ticker & Day Out
+        -----------------------------------------*/
         trades = trades.map(trade => {
-            trade.key = trade.symbol+'_'+trade.date_out_nice;
+            trade.symbolDayPair = trade.symbol+'_'+trade.date_out_nice;
             return trade;
         })
+        let tradesByDaySymbol = _.groupBy(trades, trade => trade.symbolDayPair);
+        tradesByDaySymbol = _.map(tradesByDaySymbol, (trades) => {
+            return { 
+                date: trades[0].date_out_nice,
+                symbol: trades[0].symbol,
+                profit_loss: _.sumBy(trades, trade => trade.profit_loss),
+                trades: trades
+            }
+        })
 
-        let tradesGrouped = _.groupBy(trades, trade => trade.key);
-        tradesGrouped = _.map(tradesGrouped, (trades) => {
+
+        /* Group Trades into Days
+        -----------------------------------------*/
+        let tradesByDay = _.groupBy(trades, trade => trade.date_out_nice);
+        tradesByDay = _.map(tradesByDay, (trades) => {
             return { 
                 date: trades[0].date_out_nice,
                 symbol: trades[0].symbol,
@@ -409,7 +423,8 @@ app.get('/get-trades', (req, res) => {
 
         res.send({
             trades: trades,
-            tradesGrouped: tradesGrouped
+            tradesByDaySymbol: tradesByDaySymbol,
+            tradesByDay: tradesByDay
         })
     })
 }) 
