@@ -388,40 +388,49 @@ const InsertCsvData = async (req, res) => {
 --------------------------------------------
 --------------------------------------------*/
 app.get('/get-trades', (req, res) => {
-    db.query("SELECT *, DATE_FORMAT(date_in,'%m/%d/%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m/%d/%Y') AS date_out_nice  FROM trades WHERE member_id = ? ORDER BY id DESC", 
+    db.query("SELECT *, DATE_FORMAT(date_in,'%m/%d/%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m/%d/%Y') AS date_out_nice  FROM trades WHERE member_id = ? ORDER BY id ASC", 
     [1], (err, trades) => {
 
-
-        /* Group Trades into Ticker & Day Out
+        /* Trades: By Ticker & Day 
         -----------------------------------------*/
         trades = trades.map(trade => {
             trade.symbolDayPair = trade.symbol+'_'+trade.date_out_nice;
             return trade;
         })
         let tradesByDaySymbol = _.groupBy(trades, trade => trade.symbolDayPair);
+        let runningProfit = 0;
         tradesByDaySymbol = _.map(tradesByDaySymbol, (trades) => {
+            let profitLossDay = _.sumBy(trades, trade => trade.profit_loss);
+            runningProfit += profitLossDay
             return { 
                 date: trades[0].date_out_nice,
                 symbol: trades[0].symbol,
                 profit_loss: _.sumBy(trades, trade => trade.profit_loss),
+                running_profit: runningProfit,
                 trades: trades
             }
         })
 
-
-        /* Group Trades into Days
+        /* Trades: By Day
         -----------------------------------------*/
+        let runningProfitByDay = 0;
         let tradesByDay = _.groupBy(trades, trade => trade.date_out_nice);
         tradesByDay = _.map(tradesByDay, (trades) => {
+            let profitLossDay = _.sumBy(trades, trade => trade.profit_loss);
+            runningProfitByDay += profitLossDay
             return { 
                 date: trades[0].date_out_nice,
                 symbol: trades[0].symbol,
-                profit_loss: _.sumBy(trades, trade => trade.profit_loss),
+                profit_loss: profitLossDay,
+                running_profit: runningProfitByDay,
                 trades: trades
             }
         })
 
+        /* Trade Data Response
+        ------------------------------------------*/
         res.send({
+            profitAllTime: trades.map(trade => trade.profit_loss).reduce((a, b) => a + b, 0).toFixed(2),
             trades: trades,
             tradesByDaySymbol: tradesByDaySymbol,
             tradesByDay: tradesByDay

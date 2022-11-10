@@ -1,48 +1,67 @@
 import { useState, useEffect } from 'react';
 import Axios from 'axios';
-import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Area, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart } from 'recharts';
 
 
 const Dashboard2 = ({user})=>{    
     
     let [trades, setTrades ] = useState(false);
-    let [tradesByDaySymbol, setTradesByDaySymbol ] = useState(false);
     let [tradesByDay, setTradesByDay ] = useState(false);
-    let [tradesByDayReverse, setTradesByDayReverse ] = useState(false);
+    let [tradesByDaySymbol, setTradesByDaySymbol ] = useState(false);
 
     useEffect(() => {
         Axios.get("http://"+window.location.hostname+":3001/get-trades").then((response)=> {
             setTrades(response.data.trades);
-            setTradesByDaySymbol(response.data.tradesByDaySymbol);
             setTradesByDay(response.data.tradesByDay);
-            setTradesByDayReverse(response.data.tradesByDay.reverse());
+            setTradesByDaySymbol(response.data.tradesByDaySymbol);
         });
     },[])
+
     
     return (
         <>
+  
             
-            { tradesByDaySymbol &&
+            { trades &&
+                <>
+
+                <div className="new-chart">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={tradesByDay} margin={{left:40,right:80,top:40,bottom:40}}>
+                            <XAxis name="date" />
+                            <YAxis type='number' />
+                            <Line dataKey="running_profit" stroke="#8884d8" dot={false} />
+                            <Area type="monotone" dataKey="pv" stroke="#82ca9d" fill="#82ca9d" />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
                 <div className="new-chart">
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart width={500} height={300} data={tradesByDayReverse} margin={{top: 5, right: 30, left: 20, bottom: 5,}} reverseStackOrder="true">
-                    <CartesianGrid strokeDasharray="2 2" />
+                    <BarChart data={tradesByDay} margin={{left:40,right:80,top:40,bottom:40}}>
                     <XAxis dataKey="date" />
                     <YAxis />
-                    <Tooltip />
-                    {/* <Legend /> */}
                     <Bar dataKey="profit_loss" fill="#0c9"  />
                     </BarChart>
                 </ResponsiveContainer>
                 </div>
+                </>
             }
 
-            { trades &&
-                <ul>
-                    <li>Profit (all time): {trades.map(trade => trade.profit_loss).reduce((a, b) => a + b, 0).toFixed(2)} </li>
-                    <li>Trades (all time):  {trades.length}</li>
-                </ul>
-            } 
+
+            {/* <table className="table-a">
+                <thead>
+                    <tr>
+                        <th>All Time Profit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{trades.profitAllTime}</td>
+                    </tr>
+                </tbody>
+            </table> */}
+
+
             <table className="table-a">
                 <thead>
                     <tr>
@@ -61,6 +80,8 @@ const Dashboard2 = ({user})=>{
                     )}
                 </tbody>
             </table>
+
+            
             {/* <table className="table-a">
                 <tr>
                     <th>Symbol</th>

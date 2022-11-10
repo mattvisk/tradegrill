@@ -121,7 +121,6 @@ li {
   background: $HEADER_BG;
   align-items: center;
   padding: 0 $size_2;
-  margin-bottom:$size_4;
   .logo {
     font-size: 22px;
     letter-spacing: 0.1em;
@@ -375,9 +374,4 @@ li {
       padding:2px 6px;
     }
 
-}
-
-.new-chart {
-  height:400px;
-  width:100%;
 }
