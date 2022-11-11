@@ -1,11 +1,34 @@
+.new-chart {
+    background:#111;
+    height:400px;
+    width:100%;
+    width:800px;
+    // margin:10px auto;
+    border-radius:20px;
+}
+
+.with-sidebar {
+    display: flex;
+    flex-wrap: wrap;
+}
+.sidebar {
+    flex-basis: 20rem;
+    flex-grow: 1;
+    background:$HEADER_BG;
+    padding: 0 $size_2 + 8px;
+}
+.not-sidebar {
+    flex-basis: 0;
+    flex-grow: 999;
+    padding:20px;
+}
+
 .table-a {
     width:800px;
     border:1px solid rgba(255,255,255,.08);
     border-radius:$size_1;
     border-spacing: 0;
     overflow: hidden;
-    margin:0 auto 20px;
-
     thead tr {
         background:rgba(0,0,0,.4);
         th {
@@ -39,11 +62,4 @@
 }
 
 
-.new-chart {
-    background:#111;
-    height:400px;
-    width:100%;
-    width:800px;
-    margin:10px auto;
-    border-radius:20px;
-  }
+ 
