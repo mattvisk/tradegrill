@@ -31,7 +31,6 @@ const Dashboard2 = ({user})=>{
 
     const showDetails = (i) => {
         const isInArray = showDetailRow.includes(i)
-
         if (isInArray) {
             const newValue = arrayRemove(showDetailRow, i)
             setShowDetailRow(newValue)
@@ -110,26 +109,27 @@ const Dashboard2 = ({user})=>{
                     <table className="table-a">
                         <thead>
                             <tr>
-                                <th>Open</th>
                                 <th>Symbol</th>
                                 <th className="rt">Profit/Loss</th>
                                 <th className="rt">Trades</th>
+                                <th className="rt">Open</th>
                             </tr>
                         </thead>
                         <tbody>
                             { tradesByDaySymbol && tradesByDaySymbol.map((trades) => 
                             <>
                                 <tr  key={trades.id}>
-                                    <td><button onClick={()=>{showDetails(trades.id)}} trades="trade">Show Details</button></td>
                                     <td><Link to={`trades/${trades.symbol}/${trades.date}`}>{trades.symbol}<br /><small>{trades.date}</small></Link></td>
                                     <td>{trades.profit_loss.toFixed(2)}</td>
-                                    <td>{trades.trades.length}</td>
+                                    <td>{trades.trades.length}</td><td><button onClick={()=>{showDetails(trades.id)}} trades="trade">Open</button></td>
                                 </tr>
                                 {/* IN PROGRESS --- SHOW/HIDE if TRUE */}
                                 { showDetailRow.includes(trades.id) && trades.trades.map(trade => 
                                     <tr key={trade.id}>
                                         <td>{trade.symbol}</td>
-                                        <td>{trade.symbol}</td>
+                                        <td>{trade.side}</td>
+                                        <td>{trade.profit_loss.toFixed()}</td>
+                                        <td></td>
                                     </tr> 
                                 )}                                
                             </>
