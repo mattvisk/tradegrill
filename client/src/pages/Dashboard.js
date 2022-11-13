@@ -10,7 +10,6 @@ const Dashboard2 = ({user})=>{
     let [tradesByDay, setTradesByDay ] = useState([]);
     let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
     let [profitAllTime, setProfitAllTime] = useState(0);
-    let [showDetailRow, setShowDetailRow] = useState([]);
 
     useEffect(() => {
         Axios.get("http://"+window.location.hostname+":3001/get-trades").then((response)=> {
@@ -106,26 +105,27 @@ const Dashboard2 = ({user})=>{
                     <table className="table-a">
                         <thead>
                             <tr>
-                                <th>Open</th>
                                 <th>Symbol</th>
                                 <th className="rt">Profit/Loss</th>
                                 <th className="rt">Trades</th>
+                                <th className="rt">Open</th>
                             </tr>
                         </thead>
                         <tbody>
                             { tradesByDaySymbol && tradesByDaySymbol.map((trades) => 
                             <>
                                 <tr  key={trades.id}>
-                                    <td><button onClick={()=>{showDetails(trades.id)}} trades="trade">Show Details</button></td>
                                     <td><Link to={`trades/${trades.symbol}/${trades.date}`}>{trades.symbol}<br /><small>{trades.date}</small></Link></td>
                                     <td>{trades.profit_loss.toFixed(2)}</td>
-                                    <td>{trades.trades.length}</td>
+                                    <td>{trades.trades.length}</td><td><button onClick={()=>{showDetails(trades.id)}} trades="trade">Open</button></td>
                                 </tr>
                                 {/* IN PROGRESS --- SHOW/HIDE if TRUE */}
                                 { trades.showDetails === true && trades.trades.map(trade => 
                                     <tr key={trade.id}>
                                         <td>{trade.symbol}</td>
-                                        <td>{trade.symbol}</td>
+                                        <td>{trade.side}</td>
+                                        <td>{trade.profit_loss.toFixed()}</td>
+                                        <td></td>
                                     </tr> 
                                 )}                                
                             </>
