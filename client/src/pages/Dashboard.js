@@ -10,6 +10,7 @@ const Dashboard2 = ({user})=>{
     let [tradesByDay, setTradesByDay ] = useState([]);
     let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
     let [profitAllTime, setProfitAllTime] = useState(0);
+    let [showDetailRow, setShowDetailRow] = useState([]);
 
     useEffect(() => {
         Axios.get("http://"+window.location.hostname+":3001/get-trades").then((response)=> {
@@ -22,13 +23,21 @@ const Dashboard2 = ({user})=>{
         });
     },[])
 
-    const showDetails = (i) => {
-        
-        let copyTradesByDay = tradesByDaySymbol;
-        copyTradesByDay[i].showDetails = true;
-        setTradesByDaySymbol(copyTradesByDay);
-        console.log(tradesByDaySymbol);
+    const arrayRemove = (arr, value) => { 
+        return arr.filter(function(ele){ 
+            return ele !== value; 
+        })
+    }
 
+    const showDetails = (i) => {
+        const isInArray = showDetailRow.includes(i)
+
+        if (isInArray) {
+            const newValue = arrayRemove(showDetailRow, i)
+            setShowDetailRow(newValue)
+        } else {
+            setShowDetailRow(current => [...current, i]);
+        }
     }
 
 
@@ -117,7 +126,7 @@ const Dashboard2 = ({user})=>{
                                     <td>{trades.trades.length}</td>
                                 </tr>
                                 {/* IN PROGRESS --- SHOW/HIDE if TRUE */}
-                                { trades.showDetails===false && trades.trades.map(trade => 
+                                { showDetailRow.includes(trades.id) && trades.trades.map(trade => 
                                     <tr key={trade.id}>
                                         <td>{trade.symbol}</td>
                                         <td>{trade.symbol}</td>
