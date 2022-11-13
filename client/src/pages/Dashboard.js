@@ -116,6 +116,7 @@ const Dashboard2 = ({user})=>{
                                     <td>{trades.profit_loss.toFixed(2)}</td>
                                     <td>{trades.trades.length}</td>
                                 </tr>
+                                {/* IN PROGRESS --- SHOW/HIDE if TRUE */}
                                 { trades.showDetails===true && trades.trades.map(trade => 
                                     <tr key={trade.id}>
                                         <td>{trade.symbol}</td>
