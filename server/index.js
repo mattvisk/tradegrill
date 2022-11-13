@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', process.env.URL);
+    res.setHeader('Access-Control-Allow-Origin', [process.env.URL]);
 
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -314,8 +314,8 @@ const InsertCsvData = async (req, res) => {
 
             // Create New Trade...
             if(!previousExecution || previousExecution.trade_qty == 0){
-                const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol) VALUES (?,?,?)", 
-                    [req.session.user.id, formatDate(source.td), source.symbol])
+                const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol, side, starter) VALUES (?,?,?,?,?)", 
+                    [req.session.user.id, formatDate(source.td), source.symbol, source.side, source.qty * source.price])
                 trade_id = insertTrade[0].insertId
                 trade_qty = source.qty
                 rolling_gross_proceeds = Number(source.gross_proceeds);
@@ -388,7 +388,7 @@ const InsertCsvData = async (req, res) => {
 --------------------------------------------
 --------------------------------------------*/
 app.get('/get-trades', (req, res) => {
-    db.query("SELECT *, DATE_FORMAT(date_in,'%m/%d/%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m/%d/%Y') AS date_out_nice  FROM trades WHERE member_id = ? ORDER BY id ASC", 
+    db.query("SELECT *, DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice  FROM trades WHERE member_id = ? ORDER BY id ASC", 
     [1], (err, trades) => {
 
         /* Trades: By Ticker & Day 
@@ -399,15 +399,17 @@ app.get('/get-trades', (req, res) => {
         })
         let tradesByDaySymbol = _.groupBy(trades, trade => trade.symbolDayPair);
         let runningProfit = 0;
-        tradesByDaySymbol = _.map(tradesByDaySymbol, (trades) => {
+        tradesByDaySymbol = _.map(tradesByDaySymbol, (trades,i) => {
             let profitLossDay = _.sumBy(trades, trade => trade.profit_loss);
             runningProfit += profitLossDay
             return { 
+                id: i,
                 date: trades[0].date_out_nice,
                 symbol: trades[0].symbol,
                 profit_loss: _.sumBy(trades, trade => trade.profit_loss),
                 running_profit: runningProfit,
-                trades: trades
+                trades: trades,
+                showDetails: false
             }
         })
 
@@ -415,10 +417,11 @@ app.get('/get-trades', (req, res) => {
         -----------------------------------------*/
         let runningProfitByDay = 0;
         let tradesByDay = _.groupBy(trades, trade => trade.date_out_nice);
-        tradesByDay = _.map(tradesByDay, (trades) => {
+        tradesByDay = _.map(tradesByDay, (trades, i) => {
             let profitLossDay = _.sumBy(trades, trade => trade.profit_loss);
             runningProfitByDay += profitLossDay
             return { 
+                id: i,
                 date: trades[0].date_out_nice,
                 symbol: trades[0].symbol,
                 profit_loss: profitLossDay,

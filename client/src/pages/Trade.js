@@ -1,6 +1,5 @@
-import Chart4 from "./Charts/Chart4";
-import Chart5 from "./Charts/Chart5";
-import Statistic from "./Statistic";
+import Chart5 from "../components/Charts/Chart5";
+import Statistic from "../components/Statistic";
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Format from "date-fns/format";
@@ -69,7 +68,7 @@ const Trades = (props) => {
     .then((response) => {setTradeData(response.data);})
     .catch((error) => console.log("loadChart() Error " + error));
 
-  }, []);
+  }, []); 
 
 
 
@@ -96,40 +95,34 @@ const Trades = (props) => {
 
       {/* Trades */}
       {tradeData.success && (
-        <div className="container center">
-          <div className="tbl-header">
-            <table>
-              <thead>
+        <table className="table-a">
+          <thead>
+            <tr>
+              <th>Trade ID</th>
+              <th>Symbol</th>
+              <th>Time</th>
+              <th>Side</th>
+              <th>Price</th>
+              <td>Qty</td>
+              <th>Running Qty</th>
+              <th>Trade Qty</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tradeData.data.map((e, i) => 
                 <tr>
-                  <th>Trade ID</th>
-                  <th>Symbol</th>
-                  <th>Time</th>
-                  <th>Side</th>
-                  <th>Price</th>
-                  <td>Qty</td>
-                  <th>Running Qty</th>
-                  <th>Trade Qty</th>
+                  <td>{e.trade_id}</td>
+                  <td>{e.symbol}</td>
+                  <td>{e.exec_time}</td>
+                  <td className={e.side == 'SS' || e.side == 'S' ? 'red':'green'}>{e.side=='SS' || e.side=='S' ? "SELL" : "BUY"}</td>
+                  <td>{e.price}</td>
+                  <td>{e.qty}</td>
+                  <td>{e.runningQty}</td>
+                  <td>{e.trade_qty}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {tradeData.data.map((e, i) => {
-                  return (
-                    <tr>
-                      <td>{e.trade_id}</td>
-                      <td>{e.symbol}</td>
-                      <td>{e.exec_time}</td>
-                      <td className={e.side == 'SS' || e.side == 'S' ? 'red':'green'}>{e.side=='SS' || e.side=='S' ? "SELL" : "BUY"}</td>
-                      <td>{e.price}</td>
-                      <td>{e.qty}</td>
-                      <td>{e.runningQty}</td>
-                      <td>{e.trade_qty}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              )}
+          </tbody>
+        </table>
       )}
     </>
   );

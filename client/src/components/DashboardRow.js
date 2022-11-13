@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import Trade from './Trade';
+import Trade from '../pages/Trade';
 import CurrencyFormat from 'react-currency-format';
 const DashboardRow = (day) => {
 

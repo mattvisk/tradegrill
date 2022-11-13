@@ -1,92 +1,155 @@
+import { NavLink, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Axios from 'axios';
-import UploadTrades from '../components/UploadTrades';
-import { FaSpinner} from 'react-icons/fa';
-import DatePicker from "react-datepicker";
-import Format from 'date-fns/format';
-import ProfitLossCandles from '../components/Charts/ProfitLossCandles/ProfitLossCandles';
-import TableTrades from '../components/Tables/TableTrades';
-import { Link } from 'react-router-dom';
-import "react-datepicker/dist/react-datepicker.css";
-const Dashboard = ({user})=>{    
-    let [tradeData, setTradeData ] = useState(false);
-    let [loading, setLoading ]= useState(true);
-    let [startDate, setStartDate] = useState(new Date('2021-01-01'));
-    let [endDate, setEndDate] = useState(new Date());
-    let [showCustom, setShowCustom] = useState(false);
+import { BarChart, Area, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart } from 'recharts';
+import 'material-icons/iconfont/material-icons.css';
 
-    let changeDateAll = ()=>{
-        setStartDate(new Date('2020-01-01'));
-        setEndDate(new Date());
-        setShowCustom(false);
-    }
-    let changeDate2020 = ()=>{
-        setStartDate(new Date('2020-01-02'));
-        setEndDate(new Date('2021-01-01'));
-        setShowCustom(false);
-    }
-    let changeDate2021 = ()=>{
-        setStartDate(new Date('2021-01-02'));
-        setEndDate(new Date('2022-01-01'));
-        setShowCustom(false);
-    }
-
-    let changeDate2022 = ()=>{
-        setStartDate(new Date('2022-01-02'));
-        setEndDate(new Date('2023-01-01'));
-        setShowCustom(false);
-    }
-
-    let changeDateCustom = ()=> {setShowCustom(!showCustom)}
+const Dashboard2 = ({user})=>{    
     
-    /* Get Dashboard Trade Data
-    --------------------------------------*/
+    let [trades, setTrades ] = useState([]);
+    let [tradesByDay, setTradesByDay ] = useState([]);
+    let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
+    let [profitAllTime, setProfitAllTime] = useState(0);
+
     useEffect(() => {
-        getOverview();
-    },[startDate, endDate])
-
-
-    let getOverview = ()=>{
-        setLoading(true);
-        Axios.post("http://"+window.location.hostname+":3001/dashboardGet", {
-                'startDate': Format(startDate, 'yyyy-MM-dd'), 
-                'endDate': Format(endDate, 'yyyy-MM-dd')
-            })
-            .then((response)=> {
-            setTradeData(response.data) 
-            setLoading(false);
+        Axios.get("http://"+window.location.hostname+":3001/get-trades").then((response)=> {
+            // let shortenTrades = response.data.trades.slice(-1000);
+            // setTrades(shortenTrades);
+            setTrades(response.data.trades);
+            setTradesByDay(response.data.tradesByDay);
+            setTradesByDaySymbol(response.data.tradesByDaySymbol);
+            setProfitAllTime(response.data.profitAllTime);
         });
-    }
-    
-    /* Dashboard
-    --------------------------------------*/
-    return (
-        <>
-            <div className="dashboard-header">                
-                <div>
-                    <Link onClick={changeDateAll}>All Time</Link>
-                    <Link onClick={changeDate2020}>2020</Link>
-                    <Link onClick={changeDate2021}>2021</Link>
-                    <Link onClick={changeDate2022}>2022</Link>
-                    <Link onClick={changeDateCustom}>Custom</Link>
-                    { showCustom && <>
-                    <DatePicker className="input" selected={startDate} onChange={(date) => setStartDate(date)} />
-                    <DatePicker className="input" selected={endDate} onChange={(date) => setEndDate(date)} />
-                    </> }
-                </div>
-                <div>
-                    <UploadTrades user={user} updateData={getOverview} />
-                    { loading && <FaSpinner className="spinner" /> }
-                </div>
-            </div>
+    },[])
 
-            { tradeData.success &&
-                <div>
-                    <ProfitLossCandles data={tradeData} /> 
-                    <TableTrades data={tradeData} /> 
+    const showDetails = (i) => {
+        
+        let copyTradesByDay = tradesByDaySymbol;
+        copyTradesByDay[i].showDetails = true;
+        setTradesByDaySymbol(copyTradesByDay);
+        console.log(tradesByDaySymbol);
+
+    }
+
+
+    return (
+        <div className="with-sidebar">
+            <div class="sidebar">
+                <Link to="/" className='logo'>
+                    TradeGrill
+                </Link>
+                <NavLink to="/dashboard"><span class="material-icons">dashboard</span>Dashboard</NavLink>
+                <NavLink to="/calendar"><span class="material-icons">calendar_month</span>Calendar</NavLink>
+                <NavLink to="/all-trades"><span class="material-icons">bar_chart</span>Trades</NavLink>
+                <NavLink to="/journal"><span class="material-icons">school</span>Journal</NavLink>
+            </div>
+            <div className="not-sidebar">
+                <div className="inner">
+                    
+                    {/* ------------------------------------------- */}
+                    <h3>All Time Profit: {profitAllTime}</h3>
+                    <div className="new-chart"> 
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={tradesByDay} margin={{left:40,right:80,top:40,bottom:40}}>
+                                <XAxis name="date" />
+                                <YAxis type='number' />
+                                <Tooltip />
+                                <Line dataKey="running_profit" stroke="#8884d8" dot={false} />
+                                <Area type="monotone" dataKey="pv" stroke="#82ca9d" fill="#82ca9d" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <h3>Daily P&L</h3>
+                    <div className="new-chart">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={tradesByDay} margin={{left:40,right:80,top:40,bottom:40}}>
+                                <XAxis dataKey="date" />
+                                <YAxis />
+                                <Tooltip />
+                                <Bar dataKey="profit_loss" fill="#0c9"  /> 
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+
+                    {/* ------------------------------------------- */}
+                    <h3>Trades P&L</h3>
+                    <div className="new-chart">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={trades} margin={{left:40,right:80,top:40,bottom:40}}>
+                                <XAxis dataKey="date" />
+                                <YAxis />
+                                <Tooltip />
+                                <Bar dataKey="profit_loss" fill="#0c9"  /> 
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <table className="table-a">
+                        <thead>
+                            <tr>
+                                <th>All Time Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{ profitAllTime }</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {/* ------------------------------------------- */}
+                    <h3>Trades by Symbol & Day</h3>
+                    <table className="table-a">
+                        <thead>
+                            <tr>
+                                <th>Open</th>
+                                <th>Symbol</th>
+                                <th className="rt">Profit/Loss</th>
+                                <th className="rt">Trades</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            { tradesByDaySymbol && tradesByDaySymbol.map((trades) => 
+                            <>
+                                <tr  key={trades.id}>
+                                    <td><button onClick={()=>{showDetails(trades.id)}} trades="trade">Show Details</button></td>
+                                    <td><Link to={`trades/${trades.symbol}/${trades.date}`}>{trades.symbol}<br /><small>{trades.date}</small></Link></td>
+                                    <td>{trades.profit_loss.toFixed(2)}</td>
+                                    <td>{trades.trades.length}</td>
+                                </tr>
+                                { trades.showDetails===true && trades.trades.map(trade => 
+                                    <tr key={trade.id}>
+                                        <td>{trade.symbol}</td>
+                                        <td>{trade.symbol}</td>
+                                    </tr> 
+                                )}
+                                
+                            </>
+                            )}
+                        </tbody>
+                    </table> 
+                    {/* ------------------------------------------- */}
+                    {/* <h3>Trades</h3>
+                    <table className="table-a">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th className="rt">Profit/Loss</th>
+                                <th className="rt">Side</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            { trades && trades.map((trades,i) => 
+                                <tr key={i}>
+                                    <td>{trades.symbol}<br /><small>{trades.date}</small></td>
+                                    <td className="rt">{trades.profit_loss.toFixed(2)}</td>
+                                    <td className="rt">{trades.side}</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table> */}  
                 </div>
-            }
-        </>
+            </div> 
+        </div>
     )
 }
-export default Dashboard;
+export default Dashboard2;

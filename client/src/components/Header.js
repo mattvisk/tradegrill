@@ -32,8 +32,10 @@ const Header = ({user}) => {
             }   
             { user && 
                 <div>
+                    <NavLink to="/dashboard-old">Home</NavLink>
                     <NavLink to="/dashboard">Dashboard</NavLink>
-                    <NavLink to="/all-trades">Trades</NavLink>
+                    <NavLink to="/summary">Summary</NavLink>
+                    <NavLink to="/leaderboard">Leaderboard</NavLink>
                 </div>
             }
             { user && 
