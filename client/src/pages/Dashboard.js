@@ -16,28 +16,24 @@ const Dashboard2 = ({user})=>{
         Axios.get("http://"+window.location.hostname+":3001/get-trades").then((response)=> {
             // let shortenTrades = response.data.trades.slice(-1000);
             // setTrades(shortenTrades);
+            const tradesByDaySymbol = response.data.tradesByDaySymbol.map(object => ({ ...object, showDetails: false }))
             setTrades(response.data.trades);
             setTradesByDay(response.data.tradesByDay);
-            setTradesByDaySymbol(response.data.tradesByDaySymbol);
+            setTradesByDaySymbol(tradesByDaySymbol);
             setProfitAllTime(response.data.profitAllTime);
         });
     },[])
 
-    const arrayRemove = (arr, value) => { 
-        return arr.filter(function(ele){ 
-            return ele !== value; 
+    const showDetails = (id) => {
+        const newTrades = tradesByDaySymbol.map(data => {
+            if (data.id === id) {
+                return {...data, showDetails: !data.showDetails}
+            }
+
+            return data
         })
-    }
 
-    const showDetails = (i) => {
-        const isInArray = showDetailRow.includes(i)
-
-        if (isInArray) {
-            const newValue = arrayRemove(showDetailRow, i)
-            setShowDetailRow(newValue)
-        } else {
-            setShowDetailRow(current => [...current, i]);
-        }
+        setTradesByDaySymbol(newTrades)
     }
 
 
@@ -126,7 +122,7 @@ const Dashboard2 = ({user})=>{
                                     <td>{trades.trades.length}</td>
                                 </tr>
                                 {/* IN PROGRESS --- SHOW/HIDE if TRUE */}
-                                { showDetailRow.includes(trades.id) && trades.trades.map(trade => 
+                                { trades.showDetails === true && trades.trades.map(trade => 
                                     <tr key={trade.id}>
                                         <td>{trade.symbol}</td>
                                         <td>{trade.symbol}</td>
