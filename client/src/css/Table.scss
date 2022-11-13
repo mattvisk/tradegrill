@@ -14,9 +14,10 @@
 .sidebar {
     flex-basis: 14rem;
     flex-grow: 1;
-    background:$HEADER_BG;
-    padding: 0 14px;
+    background:$HEADER_BG_MUTE;
+    padding: 22px 14px;
     .logo {
+        display:none;
         font-family:$font_1;
         font-size:28px;
         font-weight:$font_weight_2;

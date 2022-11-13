@@ -117,13 +117,12 @@ const Dashboard2 = ({user})=>{
                                     <td>{trades.trades.length}</td>
                                 </tr>
                                 {/* IN PROGRESS --- SHOW/HIDE if TRUE */}
-                                { trades.showDetails===true && trades.trades.map(trade => 
+                                { trades.showDetails===false && trades.trades.map(trade => 
                                     <tr key={trade.id}>
                                         <td>{trade.symbol}</td>
                                         <td>{trade.symbol}</td>
                                     </tr> 
-                                )}
-                                
+                                )}                                
                             </>
                             )}
                         </tbody>

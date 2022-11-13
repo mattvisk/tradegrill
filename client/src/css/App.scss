@@ -127,19 +127,20 @@ li {
   align-items: center;
   padding: 0 $size_2;
   .logo {
-    font-size: 22px;
+    font-size: 26px;
     letter-spacing: 0.1em;
     font-family: $font_1;
     font-weight:$font_weight_2;
-    margin: $size_half 0;
-    margin-right: $size_2;
+    margin: $size_1 0;
+    margin-right: $size_3;
     letter-spacing: 0.05em;
   }
   a {
     text-decoration: none;
     color: #fff;
-    padding: 0 8px;
-    margin-right:$size_1;
+    padding: 0 14px;
+    margin:$size_1;
+    font-size:16px;
     font-weight: $font_weight_1;
     padding:10px;
     border-radius: 4px;;
