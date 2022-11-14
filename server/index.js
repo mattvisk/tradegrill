@@ -315,7 +315,7 @@ const InsertCsvData = async (req, res) => {
             // Create New Trade...
             if(!previousExecution || previousExecution.trade_qty == 0){
                 const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol, side, starter) VALUES (?,?,?,?,?)", 
-                    [req.session.user.id, formatDate(source.td), source.symbol, source.side, source.qty * source.price])
+                [req.session.user.id, formatDate(source.td), source.symbol, source.side, source.qty * source.price])
                 trade_id = insertTrade[0].insertId
                 trade_qty = source.qty
                 rolling_gross_proceeds = Number(source.gross_proceeds);

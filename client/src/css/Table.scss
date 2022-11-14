@@ -77,9 +77,12 @@
         padding:10px 24px;
         text-align: left;
         &.rt {
-            text-align: center;
+            text-align: right;
             width:50px;
         }
+    }
+    th.rt {
+        text-align: center;
     }
     td:first-child {
         color:#ddd;

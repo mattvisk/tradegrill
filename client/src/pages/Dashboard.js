@@ -23,17 +23,9 @@ const Dashboard2 = ({user})=>{
         });
     },[])
 
-    const showDetails = (id) => {
-        const newTrades = tradesByDaySymbol.map(data => {
-            if (data.id === id) {
-                return {...data, showDetails: !data.showDetails}
-            }
-
-            return data
-        })
-
-        setTradesByDaySymbol(newTrades)
-    }
+    // Toggle Table Row
+    const showDetails = id => setTradesByDaySymbol(tradesByDaySymbol.map(trade => trade.id === id ? {...trade, showDetails: !trade.showDetails} : trade));
+    
 
 
     return (
@@ -63,6 +55,7 @@ const Dashboard2 = ({user})=>{
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
+                    {/* ------------------------------------------- */}
                     <h3>Daily P&L</h3>
                     <div className="new-chart">
                         <ResponsiveContainer width="100%" height="100%">
@@ -74,7 +67,6 @@ const Dashboard2 = ({user})=>{
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
-
                     {/* ------------------------------------------- */}
                     <h3>Trades P&L</h3>
                     <div className="new-chart">
@@ -112,20 +104,26 @@ const Dashboard2 = ({user})=>{
                             </tr>
                         </thead>
                         <tbody>
-                            { tradesByDaySymbol && tradesByDaySymbol.map((trades) => 
+                            { tradesByDaySymbol && tradesByDaySymbol.slice(0).reverse().map((trades) => 
                             <>
-                                <tr  key={trades.id}>
-                                    <td><Link to={`trades/${trades.symbol}/${trades.date}`}>{trades.symbol}<br /><small>{trades.date}</small></Link></td>
-                                    <td>{trades.profit_loss.toFixed(2)}</td>
-                                    <td>{trades.trades.length}</td><td><button onClick={()=>{showDetails(trades.id)}} trades="trade">Open</button></td>
+                                <tr key={trades.id}>
+                                    <td>
+                                        <Link to={`trades/${trades.symbol}/${trades.date}`}>{trades.symbol}
+                                            <br />
+                                            <small>{trades.date}</small>
+                                        </Link>
+                                    </td>
+                                    <td></td>
+                                    <td className="rt">{trades.profit_loss.toFixed(2)}</td>
+                                    <td className="rt">{trades.trades.length}</td>
+                                    <td><button onClick={()=>{showDetails(trades.id)}} trades="trade">Open</button></td>
                                 </tr>
                                 {/* IN PROGRESS --- SHOW/HIDE if TRUE */}
                                 { trades.showDetails === true && trades.trades.map(trade => 
                                     <tr key={trade.id}>
-                                        <td>{trade.symbol}</td>
-                                        <td>{trade.side}</td>
-                                        <td>{trade.profit_loss.toFixed()}</td>
-                                        <td></td>
+                                        <td className="rt">{trade.profit_loss.toFixed(2)}</td>
+                                        <td className="rt">{trade.side}</td>
+                                        <td className="rt"></td>
                                     </tr> 
                                 )}                                
                             </>
