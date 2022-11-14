@@ -13,20 +13,15 @@ const Dashboard2 = ({user})=>{
 
     useEffect(() => {
         Axios.get("http://"+window.location.hostname+":3001/get-trades").then((response)=> {
-            // let shortenTrades = response.data.trades.slice(-1000);
-            // setTrades(shortenTrades);
-            const tradesByDaySymbol = response.data.tradesByDaySymbol.map(object => ({ ...object, showDetails: false }))
             setTrades(response.data.trades);
             setTradesByDay(response.data.tradesByDay);
-            setTradesByDaySymbol(tradesByDaySymbol);
+            setTradesByDaySymbol(response.data.tradesByDaySymbol);
             setProfitAllTime(response.data.profitAllTime);
         });
     },[])
 
     // Toggle Table Row
     const showDetails = id => setTradesByDaySymbol(tradesByDaySymbol.map(trade => trade.id === id ? {...trade, showDetails: !trade.showDetails} : trade));
-    
-
 
     return (
         <div className="with-sidebar">
