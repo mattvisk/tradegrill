@@ -290,6 +290,10 @@ const formatDate = (date)=>{
     mysqlDate = mysqlDate.toISOString().split("T")[0];
     return mysqlDate;
 }
+const formatDateTime = (d)=>{
+    let mysqlDate = new Date(d);
+    return mysqlDate;
+}
 const InsertCsvData = async (req, res) => {
     await database.beginTransaction()
     try {
@@ -297,7 +301,7 @@ const InsertCsvData = async (req, res) => {
         const userColumns = ["member_id"];
         const csvColumns = ["account", "td", "sd", "currency", "type", "side", "symbol", "qty", "price", "exec_time", "comm", "sec", "taf", "nscc", "nasdaq", "ecn_remove","ecn_add","gross_proceeds","net_proceeds", "clr_broker", "liq", "note", "trade_qty", "trade_id", "rolling_gross_proceeds"];
         const allColumns = userColumns.concat(csvColumns);
-        const securityQuestionMarks = allColumns.map(el=>{return "?"}).toString();
+        const securityQuestionMarks = allColumns.map(()=>{return "?"}).toString();
 
         const sources = await csvtojson({
             noheader:false,
@@ -314,8 +318,8 @@ const InsertCsvData = async (req, res) => {
 
             // Create New Trade...
             if(!previousExecution || previousExecution.trade_qty == 0){
-                const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol, side, starter) VALUES (?,?,?,?,?)", 
-                [req.session.user.id, formatDate(source.td), source.symbol, source.side, source.qty * source.price])
+                const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol, side, starter, time_in) VALUES (?,?,?,?,?,?)", 
+                [req.session.user.id, formatDate(source.td), source.symbol, source.side, source.qty * source.price, formatDateTime(source.td+' '+source.exec_time)])
                 trade_id = insertTrade[0].insertId
                 trade_qty = source.qty
                 rolling_gross_proceeds = Number(source.gross_proceeds);
@@ -328,8 +332,8 @@ const InsertCsvData = async (req, res) => {
 
                 // Complete Trade
                 if(trade_qty == 0){
-                    await database.execute("UPDATE trades SET profit_loss = ?, date_out = ? WHERE id = ? AND member_id = ?", 
-                    [rolling_gross_proceeds, formatDate(source.td), trade_id, req.session.user.id])
+                    await database.execute("UPDATE trades SET profit_loss = ?, date_out = ?, time_out=? WHERE id = ? AND member_id = ?", 
+                    [rolling_gross_proceeds, formatDate(source.td), formatDateTime(source.td+' '+source.exec_time), trade_id, req.session.user.id])
                 }
             }
 
@@ -364,7 +368,7 @@ const InsertCsvData = async (req, res) => {
             ])
 
             // Test
-            console.log("insert execution", trade_id, source.symbol, formatDate(source.td), source.exec_time, source.side, source.qty, "=", trade_qty, source.gross_proceeds, '=', rolling_gross_proceeds)
+            console.log("insert execution", trade_id, source.symbol, formatDateTime(source.td+' '+source.exec_time), source.exec_time, source.side, source.qty, "=", trade_qty, source.gross_proceeds, '=', rolling_gross_proceeds)
             
         }
 
@@ -387,9 +391,10 @@ const InsertCsvData = async (req, res) => {
 /* Trades
 --------------------------------------------
 --------------------------------------------*/
-app.get('/get-trades', (req, res) => {
-    db.query("SELECT *, DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice  FROM trades WHERE member_id = ? ORDER BY id ASC", 
-    [1], (err, trades) => {
+app.post('/get-trades', (req, res) => {
+    console.log(req.body.dateFrom);
+    db.query("SELECT *, DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice, DATE_FORMAT(time_in,'%r') AS time_in_nice, DATE_FORMAT(time_out,'%r') AS time_out_nice  FROM trades WHERE member_id = ? AND date_out >= ? AND date_out <= ? ORDER BY id ASC", 
+    [1, req.body.dateFrom, req.body.dateTo], (err, trades) => {
 
         /* Trades: By Ticker & Day 
         -----------------------------------------*/

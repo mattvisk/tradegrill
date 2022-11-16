@@ -1,68 +1,10 @@
-.new-chart {
-    background:#111;
-    height:400px;
-    width:100%;
-    // width:800px;
-    margin:0 0 40px;
-    border-radius:20px;
-}
-
-.with-sidebar {
-    display: flex;
-    flex-wrap: wrap;
-}
-.sidebar {
-    flex-basis: 14rem;
-    flex-grow: 1;
-    background:$HEADER_BG_MUTE;
-    padding: 22px 14px;
-    .logo {
-        display:none;
-        font-family:$font_1;
-        font-size:28px;
-        font-weight:$font_weight_2;
-        &:hover {
-            color:#fff;
-        }
-    }
-    a {
-        display:block;
-        display:flex;
-        align-items: center;
-        padding:10px;
-        font-size:14px;
-        border-radius:8px;
-        color:#fff;
-        span {
-            margin-right:10px;
-            color:rgba(255,255,255,.4);
-        }
-        &:hover {
-            background:rgba(0,0,0,.1);
-            color:#fff;
-        }
-        &.active {
-            background:rgba(0,0,0,.2);
-            color:#fff;
-        }
-    }
-}
-.not-sidebar {
-    flex-basis: 0;
-    flex-grow: 999;
-    padding:0;
-    .inner {
-        max-width:1000px;
-        margin:0 auto;
-    }
-}
-
 .table-a {
     width:100%;
     border:1px solid rgba(255,255,255,.08);
     border-radius:$size_1;
     border-spacing: 0;
     overflow: hidden;
+    margin:40px 0;
     thead tr {
         background:rgba(0,0,0,.4);
         th {
@@ -72,28 +14,31 @@
             text-align: left;
         }
     }
-
-    th,td {
-        padding:10px 24px;
-        text-align: left;
-        &.rt {
-            text-align: right;
+    tbody {
+        th,td {
+            padding:10px 24px;
+        }
+        td:first-child {
+            color:#ddd;
+            font-weight: $font_weight_2;
+        }
+        td {
+            color:#ababab;
             width:50px;
         }
-    }
-    th.rt {
-        text-align: center;
-    }
-    td:first-child {
-        color:#ddd;
-        font: weight $font_weight_2;
-    }
-    td {
-        color:#ababab;
-    }
-
-    tr:nth-child(even) {
-        background:rgba(0,0,0,.1);
+        // tr:nth-child(even) {
+        //     background:rgba(0,0,0,.1);
+        // }
+        tr.child {
+            background:rgba(0,0,0,.2); 
+        }
+        tr {
+            transition: background-color 0.2s linear;
+        }
+        tr:hover {
+            background:rgba(0,0,0,.1); 
+            // background: linear-gradient(90deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,.1) 100%);
+        }
     }
     
 }

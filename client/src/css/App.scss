@@ -366,18 +366,62 @@ li {
 }
 
 
+.new-chart {
+  background:#111;
+  height:360px;
+  width:100%;
+  // width:800px;
+  margin:0 0 40px;
+  border-radius:20px;
+  
+}
 
-
-.stats-table {
-
-    
-    background:#000;
-    display:block;
-    
-
-    td,th {
-      text-align: left;
-      padding:2px 6px;
-    }
-
+.with-sidebar {
+  display: flex;
+  flex-wrap: wrap;
+}
+.sidebar {
+  flex-basis: 14rem;
+  flex-grow: 1;
+  background:$HEADER_BG_MUTE;
+  padding: 22px 14px;
+  .logo {
+      display:none;
+      font-family:$font_1;
+      font-size:28px;
+      font-weight:$font_weight_2;
+      &:hover {
+          color:#fff;
+      }
+  }
+  a {
+      display:block;
+      display:flex;
+      align-items: center;
+      padding:10px;
+      font-size:14px;
+      border-radius:8px;
+      color:#fff;
+      span {
+          margin-right:10px;
+          color:rgba(255,255,255,.4);
+      }
+      &:hover {
+          background:rgba(0,0,0,.1);
+          color:#fff;
+      }
+      &.active {
+          background:rgba(0,0,0,.2);
+          color:#fff;
+      }
+  }
+}
+.not-sidebar {
+  flex-basis: 0;
+  flex-grow: 999;
+  padding:0;
+  .inner {
+      max-width:800px;
+      margin:60px auto 0;
+  }
 }
