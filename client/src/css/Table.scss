@@ -22,22 +22,26 @@
             color:#ddd;
             font-weight: $font_weight_2;
         }
+        tr.child td:first-child {
+            color:#ababab;
+            font-weight: $font_weight_2;
+        }
         td {
             color:#ababab;
             width:50px;
         }
-        // tr:nth-child(even) {
-        //     background:rgba(0,0,0,.1);
-        // }
-        tr.child {
+        tr.child, tr.child:hover {
             background:rgba(0,0,0,.2); 
         }
         tr {
             transition: background-color 0.2s linear;
         }
         tr:hover {
-            background:rgba(0,0,0,.1); 
+            background:rgba(0,0,0,.15); 
             // background: linear-gradient(90deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,.1) 100%);
+        }
+        tr.open {
+            background:rgba(0,0,0,.25); 
         }
     }
     

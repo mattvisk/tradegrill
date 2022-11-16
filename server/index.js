@@ -393,7 +393,7 @@ const InsertCsvData = async (req, res) => {
 --------------------------------------------*/
 app.post('/get-trades', (req, res) => {
     console.log(req.body.dateFrom);
-    db.query("SELECT *, DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice, DATE_FORMAT(time_in,'%r') AS time_in_nice, DATE_FORMAT(time_out,'%r') AS time_out_nice  FROM trades WHERE member_id = ? AND date_out >= ? AND date_out <= ? ORDER BY id ASC", 
+    db.query("SELECT *, DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice, DATE_FORMAT(time_in,'%l:%i:%s') AS time_in_nice, DATE_FORMAT(time_out,'%l:%i:%s') AS time_out_nice  FROM trades WHERE member_id = ? AND date_out >= ? AND date_out <= ? ORDER BY id ASC", 
     [1, req.body.dateFrom, req.body.dateTo], (err, trades) => {
 
         /* Trades: By Ticker & Day 

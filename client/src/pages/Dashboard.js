@@ -20,7 +20,7 @@ const Dashboard2 = ({user})=>{
     // d.setHours(0, 0, 0, 0);
     // let [dateFrom, setDateFrom] = useState(d);
     
-    let [dateFrom, setDateFrom] = useState(new Date('01-01-2021'));
+    let [dateFrom, setDateFrom] = useState(new Date('01-01-2022'));
     let [dateTo, setDateTo] = useState(new Date());
 
     let margin = {top:30,right:20,left:0,bottom:30};
@@ -123,8 +123,7 @@ const Dashboard2 = ({user})=>{
                     <table className="table-a">
                         <thead>
                             <tr>
-                                <th>Date Out</th>
-                                <th>Trade</th>
+                                <th>Symbol</th>
                                 <th className="rt">Profit/Loss</th>
                                 <th className="rt">Trades</th>
                             </tr>
@@ -132,20 +131,18 @@ const Dashboard2 = ({user})=>{
                         <tbody>
                             { tradesByDaySymbol && tradesByDaySymbol.slice(0).reverse().map((trades) => 
                             <>
-                                <tr key={trades.id} onClick={()=>{showDetails(trades.id)}}>
+                                <tr key={trades.id} className={trades.showDetails && 'open'} onClick={()=>{showDetails(trades.id)}}>
                                     <td>
                                         <Link to={`trades/${trades.symbol}/${trades.date}`}>{trades.symbol}</Link>
                                         <br />
                                         {trades.date}
                                     </td>
-                                    <td></td>
                                     <td className="rt">{trades.profit_loss.toFixed(2)}</td>
                                     <td className="rt">{trades.trades.length}</td>
                                 </tr>
                                 { trades.showDetails === true && trades.trades.map(trade => 
                                     <tr key={trade.id} class="child">
-                                        <td className="">{trade.time_in_nice}</td>
-                                        <td className="">{trade.time_out_nice}</td>
+                                        <td className="">{trade.time_in_nice} - {trade.time_out_nice}</td>
                                         <td className="rt">{trade.profit_loss.toFixed(2)}</td>
                                         <td className="rt">{trade.side}</td>
                                     </tr> 
