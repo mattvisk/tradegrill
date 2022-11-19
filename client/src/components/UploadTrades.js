@@ -1,13 +1,44 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { Button } from '@mui/material';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const UploadTrades = ({user, updateData}) => {
-    
-    let [selectedFile, setSelectedFile] = useState();
 
     const onChangeHandler=event=>{
-        setSelectedFile(event.target.files[0])
+        if(checkFileType(event.target.files[0])){
+            const data = new FormData()   
+            data.append('file', event.target.files[0]);  
+            data.append('user', user)   
+            axios.post("http://"+window.location.hostname+":3001/upload-csv", data, {
+            }).then(res => {
+                if (res.status === 200) {
+                    const data = res.data.data
+                    const message = `${data.total_imported} Trades imported and ${data.total_skipped} Trades Skipped`
+                    toast.success(message, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "colored",
+                    });
+                } else {
+                    toast.error(res.data.message, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "colored",
+                    });
+                }
+            })
+        }
     }
 
     const checkFileType=(data)=>{
@@ -15,23 +46,22 @@ const UploadTrades = ({user, updateData}) => {
         if(pattern.test(data.name)){
             return true;
         } else { 
-            console.log("Wrong type of file.");
+            toast.error('Wrong type of file!', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+            });
             return false;
         }   
     }
 
     const onClickHandler = () => {
-        if(checkFileType(selectedFile)){
-            const data = new FormData()   
-            data.append('file', selectedFile);  
-            data.append('user', user)   
-            axios.post("http://"+window.location.hostname+":3001/upload-csv", data, {
-            }).then(res => {
-                console.log("Upload Complete")
-                setSelectedFile(null)
-                updateData();
-            })
-        }
+        
     }
 
     return (
@@ -39,8 +69,7 @@ const UploadTrades = ({user, updateData}) => {
             <label className="input-upload">
                 <input type="file" onChange={onChangeHandler}/>
             </label>
-            <p>{ selectedFile && selectedFile.name }</p>
-            <button className="" onClick={onClickHandler}>Upload Trades</button> 
+            <ToastContainer />
         </>
     )
 }

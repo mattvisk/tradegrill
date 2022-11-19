@@ -49,7 +49,7 @@ const Dashboard2 = ({user}) => {
                 <NavLink to="/all-trades"><span class="material-icons">bar_chart</span>Trades</NavLink>
                 <NavLink to="/journal"><span class="material-icons">school</span>Journal</NavLink>
                 <hr />
-                <NavLink to="/journal"><span class="material-icons">upload</span>Upload Trades</NavLink>
+                <NavLink to="/upload-trades"><span class="material-icons">upload</span>Upload Trades</NavLink>
             </div>
             <div className="not-sidebar">
                 <div className="inner">
