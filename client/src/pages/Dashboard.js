@@ -48,9 +48,8 @@ const Dashboard2 = ({user}) => {
                 <NavLink to="/calendar"><span class="material-icons">calendar_month</span>Calendar</NavLink>
                 <NavLink to="/all-trades"><span class="material-icons">bar_chart</span>Trades</NavLink>
                 <NavLink to="/journal"><span class="material-icons">school</span>Journal</NavLink>
-                {Format(dateFrom, 'M-dd-yyyy')}
-                <br />
-                {Format(dateTo, 'MM-dd-yyyy')}
+                <hr />
+                <NavLink to="/journal"><span class="material-icons">upload</span>Upload Trades</NavLink>
             </div>
             <div className="not-sidebar">
                 <div className="inner">
