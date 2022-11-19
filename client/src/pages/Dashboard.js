@@ -5,27 +5,20 @@ import Format from 'date-fns/format';
 import { BarChart, Area, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart } from 'recharts';
 import 'material-icons/iconfont/material-icons.css';
 
-const Dashboard2 = ({user})=>{    
+const Dashboard2 = ({user}) => {
     
+    // State
     let [recentTrades, setRecentTrades ] = useState([]);
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
     let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
     let [profitAllTime, setProfitAllTime] = useState(0);
 
-
-    // // X months ago
-    // let d = new Date();
-    // d.setMonth(d.getMonth() - 6);
-    // d.setHours(0, 0, 0, 0);
-    // let [dateFrom, setDateFrom] = useState(d);
-    
+    // Data Filter
     let [dateFrom, setDateFrom] = useState(new Date('01-01-2022'));
     let [dateTo, setDateTo] = useState(new Date());
 
-    let margin = {top:30,right:20,left:0,bottom:30};
-
-
+    // Http Request: Get Trades
     useEffect(() => {
         Axios.post("http://"+window.location.hostname+":3001/get-trades", {
             'dateFrom': Format(dateFrom, 'yyyy-MM-dd'), 
@@ -60,6 +53,8 @@ const Dashboard2 = ({user})=>{
                 <div className="inner">
 
                     {/* ------------------------------------------- */}
+                    <h1>Dashboard</h1>
+                    <button>{Format(dateFrom, 'MMM d, yyyy')}</button> - <button>Today</button>
                     <table className="table-a">
                         <thead>
                             <tr>

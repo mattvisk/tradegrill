@@ -396,6 +396,10 @@ app.post('/get-trades', (req, res) => {
     db.query("SELECT *, DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice, DATE_FORMAT(time_in,'%l:%i:%s') AS time_in_nice, DATE_FORMAT(time_out,'%l:%i:%s') AS time_out_nice  FROM trades WHERE member_id = ? AND date_out >= ? AND date_out <= ? ORDER BY id ASC", 
     [1, req.body.dateFrom, req.body.dateTo], (err, trades) => {
 
+
+        /* Trades: By Ticker & Day 
+        -----------------------------------------*/
+
         /* Trades: By Ticker & Day 
         -----------------------------------------*/
         trades = trades.map(trade => {

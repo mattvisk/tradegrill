@@ -38,6 +38,9 @@ h4 {
   font-weight: $font_weight_2;
   margin:0;
   line-height:1em;
+  sup {
+    font-size:.75em;
+  }
 }
 h1 {
   font-size: $size_6;
@@ -50,9 +53,14 @@ h2 {
   color: #3fab90;
 }
 h3 {
-  margin:20px 0;
+  margin:20px 0 8px;
   font-size: $size_3;
   font-weight:$font_weight_1;
+}
+.subtitle {
+  color: #8984d8;
+  display: inline-block;
+  margin: 0 0 20px
 }
 
 /* Text
