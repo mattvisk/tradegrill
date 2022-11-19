@@ -32,6 +32,9 @@ const Dashboard2 = ({user}) => {
         });
     },[])
 
+    // Chart Styling
+    let margin = {top:30,right:20,left:0,bottom:30};
+
     // Toggle Table Row
     const showDetails = id => setTradesByDaySymbol(tradesByDaySymbol.map(trade => trade.id === id ? {...trade, showDetails: !trade.showDetails} :  {...trade, showDetails: false} ));//trade));
 
