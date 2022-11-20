@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { Button } from '@mui/material';
-const UploadTrades = ({user, updateData}) => {
+const UploadTrades = ({user, callback}) => {
     
     const onChangeHandler=event=>{
         const pattern = new RegExp("^.*.(csv|CSV)$")
@@ -12,7 +12,7 @@ const UploadTrades = ({user, updateData}) => {
             axios.post("http://"+window.location.hostname+":3001/upload-csv", data, {
             }).then(res => {
                 console.log("Upload Complete")
-                // updateData();
+                callback();
             })
         } else {
             console.log("Wrong type of file.");

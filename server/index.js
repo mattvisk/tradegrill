@@ -47,8 +47,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-
-
 app.use(cors({
     //origin: [env_url],
     origin: process.env.URL,
@@ -72,8 +70,6 @@ app.use(session({
     //     expires: 60 * 60 * 24,
     // }
 }))
-
-
 
 
 /* Database Connection 
@@ -107,10 +103,8 @@ const getDatabaseConnection = async () => {
     if (!database || database?.connection?._closing) {
         database = await initializeDatabase()
     }
-
     return database
 }
-
 getDatabaseConnection()
 
 /* Registration 
@@ -146,7 +140,6 @@ app.post('/register', (req, res)=>{
 --------------------------------------------
 --------------------------------------------*/
 app.get('/patterns', (req, res) => {
-
     db.query("SELECT * FROM patterns", [], (err, result) => res.send(result))
 }) 
 
@@ -156,7 +149,6 @@ app.get('/patterns', (req, res) => {
 --------------------------------------------
 --------------------------------------------*/
 app.get('/statistics', (req, res) => {
-
     db.query("SELECT * FROM statistics ORDER BY date_in", [], (err, result) => res.send(result))
 }) 
 
@@ -322,7 +314,7 @@ const InsertCsvData = async (req, res) => {
             )
             let previousExecution = rows[0]
 
-            // Create New Trade...
+            // Add Executions to New Trade...
             if(!previousExecution || previousExecution.trade_qty == 0){
                 const insertTrade = await database.execute(
                     "INSERT INTO trades(member_id, date_in, symbol, side, starter, time_in) VALUES (?,?,?,?,?,?)", 
@@ -398,17 +390,13 @@ const InsertCsvData = async (req, res) => {
 }
 
 
-/* Trades
+/* Trades (temporary static memberid)
 --------------------------------------------
 --------------------------------------------*/
 app.post('/get-trades', (req, res) => {
     console.log(req.body.dateFrom);
     db.query("SELECT *, DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice, DATE_FORMAT(time_in,'%l:%i:%s') AS time_in_nice, DATE_FORMAT(time_out,'%l:%i:%s') AS time_out_nice  FROM trades WHERE member_id = ? AND date_out >= ? AND date_out <= ? ORDER BY time_out ASC", 
     [1, req.body.dateFrom, req.body.dateTo], (err, trades) => {
-
-
-        /* Trades: By Ticker & Day 
-        -----------------------------------------*/
 
         /* Trades: By Ticker & Day 
         -----------------------------------------*/
@@ -463,7 +451,7 @@ app.post('/get-trades', (req, res) => {
 
 
 
-/* Get Trade Dashboard
+/* Dashboard Old
 --------------------------------------------
 --------------------------------------------*/
 app.post("/dashboardGet", (req, res) => {    
@@ -597,16 +585,20 @@ app.post("/trades", (req, res) => {
 --------------------------------------------
 --------------------------------------------*/
 app.get("/deleteTrades", (req, res) => {
-    db.query("DELETE FROM executions WHERE member_id = ?",
-        req.session.user.id,
-        (err, result) => { if(err) {res.send({ err: err })}
-            console.log(result);
-        } 
-    );
     db.query("DELETE FROM trades WHERE member_id = ?",
         req.session.user.id,
-        (err, result) => { if(err) {res.send({ err: err })}
-            console.log(result);
+        (err, result) => { 
+            if(err) {res.send({ err: err })}
+            db.query("DELETE FROM executions WHERE member_id = ?",
+            req.session.user.id,
+            (err, result) => { 
+                if(err) {res.send({ err: err })}
+                console.log(result);
+
+                res.send({
+                    message: "Trades Deleted!"
+                })
+            })
         } 
     );
 });

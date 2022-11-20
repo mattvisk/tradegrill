@@ -8,8 +8,10 @@ import 'material-icons/iconfont/material-icons.css';
 
 const Dashboard2 = ({user}) => {
     
-    // State
+    // Use Effect?
+    useEffect(() => {getData()},[])
     
+    // State
     let [recentTrades, setRecentTrades ] = useState([]);
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
@@ -20,8 +22,8 @@ const Dashboard2 = ({user}) => {
     let [dateFrom, setDateFrom] = useState(new Date('01-01-2022'));
     let [dateTo, setDateTo] = useState(new Date());
 
-    // Http Request: Get Trades
-    useEffect(() => {
+    // Http Request: Get Trade Data
+    const getData = ()=>{
         Axios.post("http://"+window.location.hostname+":3001/get-trades", {
             'dateFrom': Format(dateFrom, 'yyyy-MM-dd'), 
             'dateTo': Format(dateTo, 'yyyy-MM-dd')
@@ -32,13 +34,14 @@ const Dashboard2 = ({user}) => {
             setTradesByDaySymbol(response.data.tradesByDaySymbol);
             setProfitAllTime(response.data.profitAllTime);
         });
-    },[])
+    }
 
     // Delete Request
     const deleteTrades = ()=>{
         Axios.get("http://"+window.location.hostname+":3001"+"/deleteTrades")
             .then((response)=> {
                 console.log("Deleted Trades");
+                getData();
             }
         );
     }
@@ -64,7 +67,7 @@ const Dashboard2 = ({user}) => {
                 <button><span class="material-icons">upload</span>Upload Trades</button>
                 <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>
                 <hr />
-                <UploadTrades user={user} />
+                <UploadTrades user={user} callback={getData} />
             </div>
             <div className="not-sidebar">
                 <div className="inner">
