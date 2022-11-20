@@ -64,10 +64,8 @@ const Dashboard2 = ({user}) => {
                 <NavLink to="/journal"><span class="material-icons">school</span>Journal</NavLink>
                 <hr />
                 {/* <Link to="/journal"><span class="material-icons">upload</span>Upload Trades</Link> */}
-                <button><span class="material-icons">upload</span>Upload Trades</button>
+                <button><span class="material-icons">upload</span>Upload Trades <UploadTrades user={user} callback={getData} /></button>
                 <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>
-                <hr />
-                <UploadTrades user={user} callback={getData} />
             </div>
             <div className="not-sidebar">
                 <div className="inner">
