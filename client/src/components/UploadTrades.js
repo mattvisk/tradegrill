@@ -19,13 +19,8 @@ const UploadTrades = ({user, updateData}) => {
         }
     }
 
-    return (
-        <>
-            <label className="input-upload">
-                <input type="file" onChange={onChangeHandler}/>
-            </label>
-        </>
-    )
+    return <input type="file" onChange={onChangeHandler}/>
+    
 }
 
 export default UploadTrades;

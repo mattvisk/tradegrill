@@ -38,7 +38,7 @@ const Dashboard2 = ({user}) => {
     const deleteTrades = ()=>{
         Axios.get("http://"+window.location.hostname+":3001"+"/deleteTrades")
             .then((response)=> {
-                
+                console.log("Deleted Trades");
             }
         );
     }
