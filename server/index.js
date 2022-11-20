@@ -308,23 +308,13 @@ const InsertCsvData = async (req, res) => {
             headers:csvColumns
         }).fromFile("uploads/csv/" + req.file.filename)
 
-        let dateShouldSkipped = []
         let totalImported = 0
         let totalSkipped = 0
 
-        const dateTrades = Object.keys(_.groupBy(sources, source => source.td))
-
-        for (const date of dateTrades) {
-            const [checkExecDate] = await database.execute("SELECT * FROM executions WHERE member_id = ? AND td = ? ORDER BY id DESC LIMIT 1", [req.session.user.id, formatDate(date)])
-
-            if (checkExecDate[0]) {
-                dateShouldSkipped.push(date)
-            }
-        }
-
         for (const source of sources) {
-
-            if (dateShouldSkipped.includes(source.td)) {
+            const [checkExecDate] = await database.execute("SELECT * FROM executions WHERE member_id = ? AND td = ? ORDER BY id DESC LIMIT 1", [req.session.user.id, formatDate(source.td)])
+            
+            if (checkExecDate[0]) {
                 totalSkipped++
                 continue;
             }
