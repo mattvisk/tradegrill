@@ -402,8 +402,9 @@ li {
           color:#fff;
       }
   }
-  a {
+  a, button {
       display:block;
+      border:none;
       display:flex;
       align-items: center;
       padding:10px;

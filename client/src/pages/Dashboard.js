@@ -9,6 +9,7 @@ import 'material-icons/iconfont/material-icons.css';
 const Dashboard2 = ({user}) => {
     
     // State
+    
     let [recentTrades, setRecentTrades ] = useState([]);
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
@@ -60,8 +61,9 @@ const Dashboard2 = ({user}) => {
                 <NavLink to="/journal"><span class="material-icons">school</span>Journal</NavLink>
                 <hr />
                 {/* <Link to="/journal"><span class="material-icons">upload</span>Upload Trades</Link> */}
-                <Link onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</Link>
-
+                <button><span class="material-icons">upload</span>Upload Trades</button>
+                <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>
+                <hr />
                 <UploadTrades user={user} />
             </div>
             <div className="not-sidebar">
