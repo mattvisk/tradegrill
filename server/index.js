@@ -303,72 +303,82 @@ const InsertCsvData = async (req, res) => {
         const allColumns = userColumns.concat(csvColumns);
         const securityQuestionMarks = allColumns.map(()=>{return "?"}).toString();
 
-        const sources = await csvtojson({
+        const executions = await csvtojson({
             noheader:false,
             headers:csvColumns
         }).fromFile("uploads/csv/" + req.file.filename)
 
-        for (const source of sources) {
+        // Loop though Executions 
+        for (const execution of executions) {
             let trade_qty = 0
             let trade_id = 0
 
-            // Check Previous Execution
-            const [rows] = await database.execute("SELECT * FROM executions WHERE member_id = ? AND symbol = ? ORDER BY id DESC LIMIT 1", [req.session.user.id, source.symbol])
+            // Skip Duplicates Executions
+
+            // Get Previous Execution
+            const [rows] = await database.execute(
+                "SELECT * FROM executions WHERE member_id = ? AND symbol = ? AND td <= ? ORDER BY id DESC LIMIT 1", 
+                [req.session.user.id, execution.symbol, formatDate(execution.td)]
+            )
             let previousExecution = rows[0]
 
             // Create New Trade...
             if(!previousExecution || previousExecution.trade_qty == 0){
-                const insertTrade = await database.execute("INSERT INTO trades(member_id, date_in, symbol, side, starter, time_in) VALUES (?,?,?,?,?,?)", 
-                [req.session.user.id, formatDate(source.td), source.symbol, source.side, source.qty * source.price, formatDateTime(source.td+' '+source.exec_time)])
+                const insertTrade = await database.execute(
+                    "INSERT INTO trades(member_id, date_in, symbol, side, starter, time_in) VALUES (?,?,?,?,?,?)", 
+                    [req.session.user.id, formatDate(execution.td), execution.symbol, execution.side, execution.qty * execution.price, formatDateTime(execution.td+' '+execution.exec_time)]
+                )
                 trade_id = insertTrade[0].insertId
-                trade_qty = source.qty
-                rolling_gross_proceeds = Number(source.gross_proceeds);
+                trade_qty = execution.qty
+                rolling_gross_proceeds = Number(execution.gross_proceeds);
 
-            // Use Existing Trade...
+            // Add Executions to Existing Trade...
             } else {
                 trade_id = previousExecution.trade_id
-                trade_qty = previousExecution.trade_qty + Number(source.qty) * (source.side == 'B' || source.side == 'SS' ? 1 : -1);
-                rolling_gross_proceeds = Number(previousExecution.rolling_gross_proceeds) + Number(source.gross_proceeds);
+                trade_qty = previousExecution.trade_qty + Number(execution.qty) * (execution.side == 'B' || execution.side == 'SS' ? 1 : -1);
+                rolling_gross_proceeds = Number(previousExecution.rolling_gross_proceeds) + Number(execution.gross_proceeds);
 
                 // Complete Trade
                 if(trade_qty == 0){
-                    await database.execute("UPDATE trades SET profit_loss = ?, date_out = ?, time_out=? WHERE id = ? AND member_id = ?", 
-                    [rolling_gross_proceeds, formatDate(source.td), formatDateTime(source.td+' '+source.exec_time), trade_id, req.session.user.id])
+                    await database.execute(
+                        "UPDATE trades SET profit_loss = ?, date_out = ?, time_out=? WHERE id = ? AND member_id = ?", 
+                        [rolling_gross_proceeds, formatDate(execution.td), formatDateTime(execution.td+' '+execution.exec_time), trade_id, req.session.user.id]
+                    )
                 }
             }
 
             // Insert Executions
             await database.execute("INSERT INTO executions ("+allColumns.toString()+") VALUES ("+securityQuestionMarks+")", [
                 req.session.user.id,
-                source.account,
-                formatDate(source.td),
-                formatDate(source.sd),
-                source.currency,
-                source.type,
-                source.side,
-                source.symbol,
-                source.qty,
-                source.price,
-                source.exec_time,
-                source.comm,
-                source.sec,
-                source.taf,
-                source.nscc,
-                source.nasdaq,
-                source.ecn_remove,
-                source.ecn_add,
-                source.gross_proceeds,
-                source.net_proceeds,
-                source.clr_broker,
-                source.liq,
-                source.note,
+                execution.account,
+                formatDate(execution.td),
+                formatDate(execution.sd),
+                execution.currency,
+                execution.type,
+                execution.side,
+                execution.symbol,
+                execution.qty,
+                execution.price,
+                execution.exec_time,
+                execution.comm,
+                execution.sec,
+                execution.taf,
+                execution.nscc,
+                execution.nasdaq,
+                execution.ecn_remove,
+                execution.ecn_add,
+                execution.gross_proceeds,
+                execution.net_proceeds,
+                execution.clr_broker,
+                execution.liq,
+                execution.note,
                 trade_qty,
                 trade_id,
                 rolling_gross_proceeds
             ])
 
             // Test
-            console.log("insert execution", trade_id, source.symbol, formatDateTime(source.td+' '+source.exec_time), source.exec_time, source.side, source.qty, "=", trade_qty, source.gross_proceeds, '=', rolling_gross_proceeds)
+            console.log("insert execution", trade_id, execution.symbol, formatDateTime(execution.td+' '+execution.exec_time), execution.exec_time, execution.side, execution.qty, "=", trade_qty, execution.gross_proceeds, '=', rolling_gross_proceeds)
             
         }
 
@@ -393,7 +403,7 @@ const InsertCsvData = async (req, res) => {
 --------------------------------------------*/
 app.post('/get-trades', (req, res) => {
     console.log(req.body.dateFrom);
-    db.query("SELECT *, DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice, DATE_FORMAT(time_in,'%l:%i:%s') AS time_in_nice, DATE_FORMAT(time_out,'%l:%i:%s') AS time_out_nice  FROM trades WHERE member_id = ? AND date_out >= ? AND date_out <= ? ORDER BY id ASC", 
+    db.query("SELECT *, DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice, DATE_FORMAT(time_in,'%l:%i:%s') AS time_in_nice, DATE_FORMAT(time_out,'%l:%i:%s') AS time_out_nice  FROM trades WHERE member_id = ? AND date_out >= ? AND date_out <= ? ORDER BY time_out ASC", 
     [1, req.body.dateFrom, req.body.dateTo], (err, trades) => {
 
 

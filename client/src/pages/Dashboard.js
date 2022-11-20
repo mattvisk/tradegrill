@@ -1,6 +1,7 @@
 import { NavLink, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Axios from 'axios';
+import UploadTrades from '../components/UploadTrades';
 import Format from 'date-fns/format';
 import { BarChart, Area, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart } from 'recharts';
 import 'material-icons/iconfont/material-icons.css';
@@ -32,6 +33,15 @@ const Dashboard2 = ({user}) => {
         });
     },[])
 
+    // Delete Request
+    const deleteTrades = ()=>{
+        Axios.get("http://"+window.location.hostname+":3001"+"/deleteTrades")
+            .then((response)=> {
+                
+            }
+        );
+    }
+
     // Chart Styling
     let margin = {top:30,right:20,left:0,bottom:30};
 
@@ -49,7 +59,10 @@ const Dashboard2 = ({user}) => {
                 <NavLink to="/all-trades"><span class="material-icons">bar_chart</span>Trades</NavLink>
                 <NavLink to="/journal"><span class="material-icons">school</span>Journal</NavLink>
                 <hr />
-                <NavLink to="/journal"><span class="material-icons">upload</span>Upload Trades</NavLink>
+                {/* <Link to="/journal"><span class="material-icons">upload</span>Upload Trades</Link> */}
+                <Link onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</Link>
+
+                <UploadTrades user={user} />
             </div>
             <div className="not-sidebar">
                 <div className="inner">

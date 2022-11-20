@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { Button } from '@mui/material';
 
-const UploadTrades = ({user, updateData}) => {
+const UploadTrades = ({user}) => {
     
     let [selectedFile, setSelectedFile] = useState();
 
@@ -29,7 +29,7 @@ const UploadTrades = ({user, updateData}) => {
             }).then(res => {
                 console.log("Upload Complete")
                 setSelectedFile(null)
-                updateData();
+                // updateData();
             })
         }
     }
