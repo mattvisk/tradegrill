@@ -308,17 +308,7 @@ const InsertCsvData = async (req, res) => {
             headers:csvColumns
         }).fromFile("uploads/csv/" + req.file.filename)
 
-        let totalImported = 0
-        let totalSkipped = 0
-
         for (const source of sources) {
-            const [checkExecDate] = await database.execute("SELECT * FROM executions WHERE member_id = ? AND td = ? ORDER BY id DESC LIMIT 1", [req.session.user.id, formatDate(source.td)])
-            
-            if (checkExecDate[0]) {
-                totalSkipped++
-                continue;
-            }
-
             let trade_qty = 0
             let trade_id = 0
 
@@ -377,7 +367,6 @@ const InsertCsvData = async (req, res) => {
                 rolling_gross_proceeds
             ])
 
-            totalImported++
             // Test
             console.log("insert execution", trade_id, source.symbol, formatDateTime(source.td+' '+source.exec_time), source.exec_time, source.side, source.qty, "=", trade_qty, source.gross_proceeds, '=', rolling_gross_proceeds)
             
@@ -386,12 +375,8 @@ const InsertCsvData = async (req, res) => {
         await database.commit()
 
         res.send({
-            message: "Upload Received!",
-            data: {
-                total_imported: totalImported,
-                total_skipped: totalSkipped
-            }
-        }, 200)
+            message: "Upload Received!"
+        })
     
     } catch (e) {
         console.error('Failed to upload CSV Error : ', e)

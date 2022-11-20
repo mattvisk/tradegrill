@@ -9,7 +9,6 @@ import Dashboard from "./pages/Dashboard";
 import Trade from "./pages/Trade";
 import Logout from "./pages/Logout";
 import Statistics from "./pages/Statistics";
-import UploadTrades from "./pages/UploadTrades";
 import {
   BrowserRouter as Router,
   Route,
@@ -48,7 +47,6 @@ function App() {
           <Route exact path="/trades/:urlSymbol/:urlDate/:urlDays"><Trade user={user} /></Route>
           <Route exact path="/trades/:urlSymbol/:urlDate"><Trade user={user} /></Route>
           <Route exact path="/statistics">{" "}{user ? <Statistics user={user} /> : <LoginRedirect />}{" "}</Route>
-          <Route exact path="/upload-trades">{" "}{user ? <UploadTrades user={user} /> : <LoginRedirect />}{" "}</Route>
           <Route exact path="/profile">{" "}{user ? <Profile user={user} /> : <LoginRedirect />}{" "}</Route>
           <Route exact path="/logout">{" "}{user ? (<Logout user={user} setUser={setUser} />) : (<LoginRedirect />)}{" "}</Route>
         </Switch>
