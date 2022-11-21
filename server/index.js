@@ -300,12 +300,30 @@ const InsertCsvData = async (req, res) => {
             headers:csvColumns
         }).fromFile("uploads/csv/" + req.file.filename)
 
+        let dateShouldSkipped = []
+        let totalImported = 0
+        let totalSkipped = 0
+
+        const dateTrades = Object.keys(_.groupBy(executions, execution => execution.td))
+
+        for (const date of dateTrades) {
+            const [checkExecDate] = await database.execute("SELECT * FROM executions WHERE member_id = ? AND td = ? ORDER BY id DESC LIMIT 1", [req.session.user.id, formatDate(date)])
+
+            if (checkExecDate[0]) {
+                dateShouldSkipped.push(date)
+            }
+        }
+
         // Loop though Executions 
         for (const execution of executions) {
             let trade_qty = 0
             let trade_id = 0
 
             // Skip Duplicates Executions
+            if (dateShouldSkipped.includes(execution.td)) {
+                totalSkipped++
+                continue;
+            }
 
             // Get Previous Execution
             const [rows] = await database.execute(
@@ -369,6 +387,8 @@ const InsertCsvData = async (req, res) => {
                 rolling_gross_proceeds
             ])
 
+            totalImported++
+
             // Test
             console.log("insert execution", trade_id, execution.symbol, formatDateTime(execution.td+' '+execution.exec_time), execution.exec_time, execution.side, execution.qty, "=", trade_qty, execution.gross_proceeds, '=', rolling_gross_proceeds)
             
@@ -377,8 +397,12 @@ const InsertCsvData = async (req, res) => {
         await database.commit()
 
         res.send({
-            message: "Upload Received!"
-        })
+            message: "Upload Received!",
+            data: {
+                total_imported: totalImported,
+                total_skipped: totalSkipped
+            }
+        }, 200)
     
     } catch (e) {
         console.error('Failed to upload CSV Error : ', e)
