@@ -12,7 +12,7 @@ const Dashboard2 = ({user}) => {
     useEffect(() => {getData()},[])
     
     // State
-    let [recentTrades, setRecentTrades ] = useState([]);
+    // let [recentTrades, setRecentTrades ] = useState([]);
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
     let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
@@ -29,7 +29,7 @@ const Dashboard2 = ({user}) => {
             'dateTo': Format(dateTo, 'yyyy-MM-dd')
         }).then((response)=> {
             setTrades(response.data.trades);
-            setRecentTrades(response.data.trades.slice(-100));
+            // setRecentTrades(response.data.trades.slice(-100));
             setTradesByDay(response.data.tradesByDay);
             setTradesByDaySymbol(response.data.tradesByDaySymbol);
             setProfitAllTime(response.data.profitAllTime);

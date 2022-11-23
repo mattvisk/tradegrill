@@ -16,9 +16,9 @@ const UploadTrades = ({user, callback}) => {
                     const data = res.data.data
                     const message = `${data.total_imported} Trades imported and ${data.total_skipped} Trades Skipped`
                     toast.success(message, {
-                        position: "top-right",
+                        position: "top-left",
                         autoClose: 5000,
-                        hideProgressBar: false,
+                        hideProgressBar: true,
                         closeOnClick: true,
                         pauseOnHover: true,
                         draggable: true,
@@ -29,7 +29,7 @@ const UploadTrades = ({user, callback}) => {
                     toast.error(res.data.message, {
                         position: "top-right",
                         autoClose: 5000,
-                        hideProgressBar: false,
+                        hideProgressBar: true,
                         closeOnClick: true,
                         pauseOnHover: true,
                         draggable: true,
