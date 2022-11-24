@@ -17,6 +17,7 @@ import {
 } from "react-router-dom";
 import "./css/Tokens.scss";
 import "./css/App.scss";
+import "./css/Grid.scss";
 function App() {
   let [user, setUser] = useState();
   useEffect(() => {

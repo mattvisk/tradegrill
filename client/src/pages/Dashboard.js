@@ -1,5 +1,5 @@
 import { NavLink, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Axios from 'axios';
 import UploadTrades from '../components/UploadTrades';
 import Format from 'date-fns/format';
@@ -11,6 +11,7 @@ const Dashboard2 = ({user}) => {
     // Use Effect?
     useEffect(() => {getData()},[])
     
+    const filterRef = useRef(null)
     // State
     // let [recentTrades, setRecentTrades ] = useState([]);
     let [trades, setTrades ] = useState([]);
@@ -23,11 +24,17 @@ const Dashboard2 = ({user}) => {
     let [dateTo, setDateTo] = useState(new Date());
 
     // Http Request: Get Trade Data
-    const getData = ()=>{
-        Axios.post("http://"+window.location.hostname+":3001/get-trades", {
+    const getData = (symbol = null)=>{
+        const params = {
             'dateFrom': Format(dateFrom, 'yyyy-MM-dd'), 
             'dateTo': Format(dateTo, 'yyyy-MM-dd')
-        }).then((response)=> {
+        }
+
+        if (symbol) {
+            params.symbol = symbol
+        }
+
+        Axios.post("http://"+window.location.hostname+":3001/get-trades", params).then((response)=> {
             setTrades(response.data.trades);
             // setRecentTrades(response.data.trades.slice(-100));
             setTradesByDay(response.data.tradesByDay);
@@ -44,6 +51,10 @@ const Dashboard2 = ({user}) => {
                 getData();
             }
         );
+    }
+
+    const handleSubmitFilter = () => {
+        getData(filterRef.current.value !== '' ? filterRef.current.value : null)
     }
 
     // Chart Styling
@@ -72,7 +83,30 @@ const Dashboard2 = ({user}) => {
 
                     {/* ------------------------------------------- */}
                     <h1>Dashboard</h1>
-                    <button>{Format(dateFrom, 'MMM d, yyyy')}</button> - <button>Today</button>
+
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-6">
+                                <button>{Format(dateFrom, 'MMM d, yyyy')}</button> - <button>Today</button>
+                            </div>
+
+                            <div class="col-6">
+                                <div className='filter-box'>
+                                    <input
+                                        className='filter-input'
+                                        ref={filterRef}
+                                        placeholder="Type Symbol Here ..."
+                                        type="text"
+                                        id="symbol_filter"
+                                        name="symbol_filter"
+                                    />
+
+                                    <button type="button" onClick={handleSubmitFilter}>Filter</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <table className="table-a">
                         <thead>
                             <tr>
@@ -106,9 +140,11 @@ const Dashboard2 = ({user}) => {
                     <div className="new-chart">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={tradesByDay} margin={margin} fontSize={12}>
-                                <YAxis tickCount={tradesByDay.length / 10} />
+                                <XAxis dataKey="symbol" />
+                                <YAxis/>
                                 <Tooltip />
-                                <Bar dataKey="profit_loss"> 
+                                <Legend />
+                                <Bar name="Profit Loss" dataKey="profit_loss"> 
                                     { tradesByDay.map((trade) => (
                                         <Cell key={trade.id} fill={trade.profit_loss >= 0 ? '#0c9' : '#c22' }/>
                                     ))}

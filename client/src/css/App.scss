@@ -447,3 +447,27 @@ li {
       margin:60px auto 0;
   }
 }
+
+.filter-box {
+  float: right;
+}
+
+.filter-input {
+  border: 0;
+  font-family: "Nunito";
+  background: #eee;
+  height: 40px;
+  font-size: 18px;
+  padding: 0 10px;
+  border-width: 0px;
+  border-radius: 8px;
+  font-size: 16px;
+  -webkit-appearance: none;
+  appearance: none;
+  line-height: 2em;
+  box-shadow: none;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #3b1a5a;
+  border-radius: 8px;
+}
