@@ -20,7 +20,7 @@ const Dashboard2 = ({user}) => {
     let [profitAllTime, setProfitAllTime] = useState(0);
 
     // Data Filter
-    let [dateFrom, setDateFrom] = useState(new Date('01-01-2022'));
+    let [dateFrom, setDateFrom] = useState(new Date('01-01-2020'));
     let [dateTo, setDateTo] = useState(new Date());
 
     // Http Request: Get Trade Data

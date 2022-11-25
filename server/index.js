@@ -417,12 +417,20 @@ const InsertCsvData = async (req, res) => {
 --------------------------------------------
 --------------------------------------------*/
 app.post('/get-trades', (req, res) => {
-    console.log(req.body.dateFrom);
-    const querySymbol = req.body.symbol ? `AND symbol = ?` : ''
-
-    const params =  req.body.symbol ? [1, req.body.dateFrom, req.body.dateTo, req.body.symbol] : [1, req.body.dateFrom, req.body.dateTo]
-
-    db.query(`SELECT *, DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice, DATE_FORMAT(time_in,'%l:%i:%s') AS time_in_nice, DATE_FORMAT(time_out,'%l:%i:%s') AS time_out_nice  FROM trades WHERE member_id = ? AND date_out >= ? AND date_out <= ? ${querySymbol} ORDER BY time_out ASC`, params, (err, trades) => {
+    const symbolQuery = req.body.symbol ? 'AND symbol = ?' : '';
+    const params =  [1, req.body.dateFrom, req.body.dateTo, req.body.symbol] // <-- temporarily hard coded member id
+    db.query(
+        `SELECT *, 
+        DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, 
+        DATE_FORMAT(date_out,'%m-%d-%Y') AS date_out_nice, 
+        DATE_FORMAT(time_in,'%l:%i:%s') AS time_in_nice, 
+        DATE_FORMAT(time_out,'%l:%i:%s') AS time_out_nice  
+        FROM trades 
+        WHERE member_id = ? 
+        AND date_out >= ? 
+        AND date_out <= ? 
+        ${symbolQuery}
+        ORDER BY time_out ASC`, params, (err, trades) => {
 
         /* Trades: By Ticker & Day 
         -----------------------------------------*/
