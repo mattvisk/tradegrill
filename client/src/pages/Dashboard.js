@@ -1,5 +1,5 @@
-import { NavLink, Link } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { NavLink, Link, useHistory  } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Axios from 'axios';
 import UploadTrades from '../components/UploadTrades';
 import Format from 'date-fns/format';
@@ -10,10 +10,12 @@ const Dashboard2 = ({user}) => {
     
     // Use Effect?
     useEffect(() => {getData()},[])
-    
-    const filterRef = useRef(null)
+
+    const history = useHistory();
+
     // State
     // let [recentTrades, setRecentTrades ] = useState([]);
+    const [symbolFilter, setSymbolFilter ] = useState(null);
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
     let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
@@ -24,13 +26,20 @@ const Dashboard2 = ({user}) => {
     let [dateTo, setDateTo] = useState(new Date());
 
     // Http Request: Get Trade Data
-    const getData = (symbol = null)=>{
+    const getData = ()=>{
+
+        let search = window.location.search
+        let paramsUrl = new URLSearchParams(search)
+        const symbol = paramsUrl.get('symbol')
+
+        setSymbolFilter(symbol)
+
         const params = {
             'dateFrom': Format(dateFrom, 'yyyy-MM-dd'), 
             'dateTo': Format(dateTo, 'yyyy-MM-dd')
         }
 
-        if (symbol) {
+        if (symbol && symbol !== '') {
             params.symbol = symbol
         }
 
@@ -53,8 +62,22 @@ const Dashboard2 = ({user}) => {
         );
     }
 
-    const handleSubmitFilter = () => {
-        getData(filterRef.current.value !== '' ? filterRef.current.value : null)
+    const handleSubmitFilter = (event) => {
+        event.preventDefault();
+
+        const value = event.target.symbol.value
+        if (value === '') {
+            history.push({
+                pathname: '/dashboard'
+            })
+        } else {
+            history.push({
+                pathname: '/dashboard',
+                search: `?symbol=${value}`
+            })
+        }
+
+        getData()
     }
 
     // Chart Styling
@@ -91,18 +114,19 @@ const Dashboard2 = ({user}) => {
                             </div>
 
                             <div class="col-6">
-                                <div className='filter-box'>
+                                <form className='filter-box' onSubmit={handleSubmitFilter}>
                                     <input
                                         className='filter-input'
-                                        ref={filterRef}
                                         placeholder="Type Symbol Here ..."
                                         type="text"
-                                        id="symbol_filter"
-                                        name="symbol_filter"
+                                        id="symbol"
+                                        name="symbol"
+                                        onChange={(e) => setSymbolFilter(e.target.value)}
+                                        value={symbolFilter}
                                     />
 
-                                    <button type="button" onClick={handleSubmitFilter}>Filter</button>
-                                </div>
+                                    <button type="submit">Filter</button>
+                                </form>
                             </div>
                         </div>
                     </div>
