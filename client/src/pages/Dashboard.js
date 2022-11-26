@@ -199,19 +199,31 @@ const Dashboard2 = ({user}) => {
                                 <th>Symbol</th>
                                 <th className="rt">Profit/Loss</th>
                                 <th className="rt">Trades</th>
+                                <th className="rt">Pattern</th>
                             </tr>
                         </thead>
                         <tbody>
                             { tradesByDaySymbol && tradesByDaySymbol.slice(0).reverse().map((trades) => 
                             <>
-                                <tr key={trades.id} className={trades.showDetails && 'open'} onClick={()=>{showDetails(trades.id)}}>
+                                <tr key={trades.id} className={trades.showDetails && 'open'}>
                                     <td>
                                         <Link to={`trades/${trades.symbol}/${trades.date}`}>{trades.symbol}</Link>
                                         <br />
                                         {trades.date}
                                     </td>
                                     <td className="rt">{trades.profit_loss.toFixed(2)}</td>
-                                    <td className="rt">{trades.trades.length}</td>
+                                    <td onClick={()=>{showDetails(trades.id)}} className="rt">{trades.trades.length} Open</td>
+                                    <td className="rt">
+                                        <select>
+                                            <option value="patterns">None</option>
+                                            <option value="patterns">First Red Day</option>
+                                            <option value="patterns">Bounce Short</option>
+                                            <option value="patterns">Parabolic Short</option>
+                                            <option value="patterns">Gap Up Short</option>
+                                            <option value="patterns">First Green Day</option>
+                                            <option value="patterns">Over Extended</option>
+                                        </select>
+                                    </td>
                                 </tr>
                                 { trades.showDetails === true && trades.trades.map(trade => 
                                     <tr key={trade.id} class="child">
@@ -224,28 +236,6 @@ const Dashboard2 = ({user}) => {
                             )}
                         </tbody>
                     </table> 
-
-
-                    {/* ------------------------------------------- */}
-                    {/* <h3>Trades</h3>
-                    <table className="table-a">
-                        <thead>
-                            <tr>
-                                <th>Symbol</th>
-                                <th className="rt">Profit/Loss</th>
-                                <th className="rt">Side</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            { trades && trades.map((trades,i) => 
-                                <tr key={i}>
-                                    <td>{trades.symbol}<br /><small>{trades.date}</small></td>
-                                    <td className="rt">{trades.profit_loss.toFixed(2)}</td>
-                                    <td className="rt">{trades.side}</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table> */}  
                 </div>
             </div> 
         </div>
