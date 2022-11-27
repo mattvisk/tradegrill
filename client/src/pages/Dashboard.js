@@ -4,18 +4,27 @@ import Axios from 'axios';
 import UploadTrades from '../components/UploadTrades';
 import Format from 'date-fns/format';
 import { BarChart, Area, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart } from 'recharts';
+import { ToastContainer, toast } from 'react-toastify';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import 'material-icons/iconfont/material-icons.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard2 = ({user}) => {
     
     // Use Effect?
-    useEffect(() => {getData()},[])
+    useEffect(() => {
+        getData()
+        getPatterns()
+    }, [])
 
     const history = useHistory();
 
     // State
     // let [recentTrades, setRecentTrades ] = useState([]);
     const [symbolFilter, setSymbolFilter ] = useState(null);
+    const [patternFilter, setPatternFilter ] = useState(null);
+    const [patterns, setPatterns ] = useState([]);
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
     let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
@@ -25,14 +34,21 @@ const Dashboard2 = ({user}) => {
     let [dateFrom, setDateFrom] = useState(new Date('01-01-2020'));
     let [dateTo, setDateTo] = useState(new Date());
 
+    const getPatterns = async () => {
+        const { data } = await Axios.get("http://"+window.location.hostname+":3001/patterns")
+        setPatterns(data)
+    }
+
     // Http Request: Get Trade Data
     const getData = ()=>{
 
         let search = window.location.search
         let paramsUrl = new URLSearchParams(search)
         const symbol = paramsUrl.get('symbol')
+        const pattern = paramsUrl.get('pattern')
 
         setSymbolFilter(symbol)
+        setPatternFilter(pattern)
 
         const params = {
             'dateFrom': Format(dateFrom, 'yyyy-MM-dd'), 
@@ -41,6 +57,10 @@ const Dashboard2 = ({user}) => {
 
         if (symbol && symbol !== '') {
             params.symbol = symbol
+        }
+
+        if (pattern && pattern !== '') {
+            params.pattern = pattern
         }
 
         Axios.post("http://"+window.location.hostname+":3001/get-trades", params).then((response)=> {
@@ -64,20 +84,77 @@ const Dashboard2 = ({user}) => {
 
     const handleSubmitFilter = (event) => {
         event.preventDefault();
+ 
+        const symbol = event.target.symbol.value
+        const pattern = event.target.pattern.value
 
-        const value = event.target.symbol.value
-        if (value === '') {
+        const filters = [{
+            type: 'symbol',
+            value: symbol
+        }, {
+            type: 'pattern',
+            value: pattern
+        }]
+
+        if (symbol === '' && pattern === '') {
             history.push({
                 pathname: '/dashboard'
             })
         } else {
+            let query = `?`
+            filters.map((filter) => filter.value !== '' && filter.value !== null ? query += `${filter.type}=${filter.value}&` : '')
             history.push({
                 pathname: '/dashboard',
-                search: `?symbol=${value}`
+                search: query
             })
         }
 
         getData()
+    }
+
+    const handleDateFilter = (type, value) => {
+        if (type === 'date_from') {
+            setDateFrom(value)
+        } else {
+            setDateTo(value)
+        }
+    }
+
+    useEffect(() => {
+        getData()
+    }, [dateFrom, dateTo])
+
+    const handlePatternChange = async (event, trades) => {
+        const pattern_id = event.target.value
+        const trade_id = []
+        trades.map((trade) => trade_id.push(trade.id))
+
+        const { status, data } = await Axios.post(`http://${window.location.hostname}:3001/update-trade`, {
+            pattern_id,
+            trade_id
+        })
+
+        if (status === 200) {
+            toast.success(data.message, {
+                position: "top-left",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "colored",
+            });
+        } else {
+            toast.error(data.message, {
+                position: "top-left",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "colored",
+            });
+        }
     }
 
     // Chart Styling
@@ -103,18 +180,43 @@ const Dashboard2 = ({user}) => {
             </div>
             <div className="not-sidebar">
                 <div className="inner">
-
+                    <ToastContainer />
                     {/* ------------------------------------------- */}
                     <h1>Dashboard</h1>
 
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-6">
-                                <button>{Format(dateFrom, 'MMM d, yyyy')}</button> - <button>Today</button>
+                    <div className="container">
+                        <div className="row">
+                            <div className="col-6">
+                                <div className="row">
+                                    <div className="filter-box col-6">
+                                        <h4>From</h4>
+                                        <DatePicker
+                                            className='filter-input'
+                                            selected={dateFrom}
+                                            onChange={(date) => handleDateFilter('date_from', date)}
+                                            selectsStart
+                                            startDate={dateFrom}
+                                            endDate={dateTo}
+                                        />
+                                    </div>
+
+                                    <div className="col-6">
+                                        <h4>To</h4>
+                                        <DatePicker
+                                            className='filter-input'
+                                            selected={dateTo}
+                                            onChange={(date) => handleDateFilter('date_to', date)}
+                                            selectsEnd
+                                            startDate={dateFrom}
+                                            endDate={dateTo}
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="col-6">
                                 <form className='filter-box' onSubmit={handleSubmitFilter}>
+                                    <br/>
                                     <input
                                         className='filter-input'
                                         placeholder="Type Symbol Here ..."
@@ -124,6 +226,13 @@ const Dashboard2 = ({user}) => {
                                         onChange={(e) => setSymbolFilter(e.target.value)}
                                         value={symbolFilter}
                                     />
+
+                                    <select className='filter-select' name="pattern">
+                                        <option value="" selected={patternFilter === null || patternFilter === '' ? 'selected' : ''}>Select Pattern</option>
+                                        {patterns.map((pattern) => 
+                                            <option value={pattern.pattern_slug} selected={patternFilter === pattern.pattern_slug}>{pattern.pattern_name}</option>
+                                        )}
+                                    </select>
 
                                     <button type="submit">Filter</button>
                                 </form>
@@ -214,14 +323,11 @@ const Dashboard2 = ({user}) => {
                                     <td className="rt">{trades.profit_loss.toFixed(2)}</td>
                                     <td onClick={()=>{showDetails(trades.id)}} className="rt">{trades.trades.length} Open</td>
                                     <td className="rt">
-                                        <select>
-                                            <option value="patterns">None</option>
-                                            <option value="patterns">First Red Day</option>
-                                            <option value="patterns">Bounce Short</option>
-                                            <option value="patterns">Parabolic Short</option>
-                                            <option value="patterns">Gap Up Short</option>
-                                            <option value="patterns">First Green Day</option>
-                                            <option value="patterns">Over Extended</option>
+                                        <select onChange={(event) => handlePatternChange(event, trades.trades)}>
+                                            <option value="">None</option>
+                                            {patterns.map((pattern) => 
+                                                <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.pattern_name}</option>
+                                            )}
                                         </select>
                                     </td>
                                 </tr>

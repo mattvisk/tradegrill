@@ -139,8 +139,33 @@ app.post('/register', (req, res)=>{
 --------------------------------------------
 --------------------------------------------
 --------------------------------------------*/
-app.get('/patterns', (req, res) => {
-    db.query("SELECT * FROM patterns", [], (err, result) => res.send(result))
+app.get('/patterns', async (req, res) => {
+    const [patterns] = await database.execute("SELECT * FROM patterns")
+    res.send(patterns)
+})
+
+/* Save Pattern Trade
+--------------------------------------------
+--------------------------------------------
+--------------------------------------------*/
+app.post('/update-trade', async (req, res) => {
+    const { pattern_id, trade_id } = req.body
+    const [pattern] = await database.execute("SELECT * FROM patterns WHERE id = ? LIMIT 1", [pattern_id])
+
+    if (!pattern[0]) {
+        return res.status(404).send({
+            message: "Selected pattern not found"
+        })
+    }
+
+    await database.execute(
+        `UPDATE trades SET pattern_id = ? WHERE id IN ('${trade_id.join("','")}') AND member_id = ?`, 
+        [pattern[0].id, req.session.user.id]
+    )
+
+    return res.status(200).send({
+        message: "Trade updated"
+    })
 }) 
 
 
@@ -416,9 +441,31 @@ const InsertCsvData = async (req, res) => {
 /* Trades (temporary static memberid)
 --------------------------------------------
 --------------------------------------------*/
-app.post('/get-trades', (req, res) => {
+app.post('/get-trades', async (req, res) => {
+    
+    let pattern = null
+    
+    if (req.body.pattern) {
+        const [patternSelected] = await database.execute("SELECT * FROM patterns WHERE pattern_slug = ? LIMIT 1", [req.body.pattern])
+
+        if (patternSelected[0]) {
+            pattern = patternSelected[0]
+        }
+    }
+
     const symbolQuery = req.body.symbol ? 'AND symbol = ?' : '';
-    const params =  [1, req.body.dateFrom, req.body.dateTo, req.body.symbol] // <-- temporarily hard coded member id
+    const patternQuery = pattern ? 'AND pattern_id = ?' : '';
+
+    const params =  [1, req.body.dateFrom, req.body.dateTo] // <-- temporarily hard coded member id
+    
+    if (req.body.symbol) {
+        params.push(req.body.symbol)
+    }
+
+    if (pattern) {
+        params.push(pattern.id)
+    }
+
     db.query(
         `SELECT *, 
         DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, 
@@ -430,6 +477,7 @@ app.post('/get-trades', (req, res) => {
         AND date_out >= ? 
         AND date_out <= ? 
         ${symbolQuery}
+        ${patternQuery}
         ORDER BY time_out ASC`, params, (err, trades) => {
 
         /* Trades: By Ticker & Day 
@@ -450,6 +498,7 @@ app.post('/get-trades', (req, res) => {
                 profit_loss: _.sumBy(trades, trade => trade.profit_loss),
                 running_profit: runningProfit,
                 trades: trades,
+                pattern_id: trades[0].pattern_id,
                 showDetails: false
             }
         })
@@ -481,8 +530,6 @@ app.post('/get-trades', (req, res) => {
         })
     })
 }) 
-
-
 
 
 /* Dashboard Old
@@ -642,7 +689,7 @@ app.get("/deleteTrades", (req, res) => {
 /*  Chart Data FinnHUB 
 --------------------------------------------
 --------------------------------------------
-//Axios.get("http://tradegrill.com:3000/chart_btbt_finnhub_1min.json")
+//Axios.get("http://localhost:3000/chart_btbt_finnhub_1min.json")
 --------------------------------------------*/
 app.post("/viewChart2", (req, res) => {
     let key = "c5f4pu2ad3ib660qup10";
