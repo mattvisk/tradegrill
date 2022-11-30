@@ -6,6 +6,7 @@ import Format from 'date-fns/format';
 import { BarChart, Area, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart } from 'recharts';
 import { ToastContainer, toast } from 'react-toastify';
 import DatePicker from "react-datepicker";
+import Select from 'react-select';
 import "react-datepicker/dist/react-datepicker.css";
 import 'material-icons/iconfont/material-icons.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -24,6 +25,7 @@ const Dashboard2 = ({user}) => {
     // let [recentTrades, setRecentTrades ] = useState([]);
     const [symbolFilter, setSymbolFilter ] = useState(null);
     const [patternFilter, setPatternFilter ] = useState(null);
+    const [sideFilter, setSideFilter ] = useState(null);
     const [patterns, setPatterns ] = useState([]);
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
@@ -36,7 +38,16 @@ const Dashboard2 = ({user}) => {
 
     const getPatterns = async () => {
         const { data } = await Axios.get("http://"+window.location.hostname+":3001/patterns")
-        setPatterns(data)
+        
+        const tempPattern = []
+        
+        for (const pattern of data) {
+            tempPattern.push({
+                value: pattern.pattern_slug,
+                label: pattern.pattern_name
+            })
+        }
+        setPatterns(tempPattern)
     }
 
     // Http Request: Get Trade Data
@@ -46,9 +57,11 @@ const Dashboard2 = ({user}) => {
         let paramsUrl = new URLSearchParams(search)
         const symbol = paramsUrl.get('symbol')
         const pattern = paramsUrl.get('pattern')
+        const side = paramsUrl.get('side')
 
         setSymbolFilter(symbol)
         setPatternFilter(pattern)
+        setSideFilter(side)
 
         const params = {
             'dateFrom': Format(dateFrom, 'yyyy-MM-dd'), 
@@ -61,6 +74,10 @@ const Dashboard2 = ({user}) => {
 
         if (pattern && pattern !== '') {
             params.pattern = pattern
+        }
+
+        if (side && side !== '') {
+            params.side = side
         }
 
         Axios.post("http://"+window.location.hostname+":3001/get-trades", params).then((response)=> {
@@ -84,19 +101,25 @@ const Dashboard2 = ({user}) => {
 
     const handleSubmitFilter = (event) => {
         event.preventDefault();
- 
+        
         const symbol = event.target.symbol.value
-        const pattern = event.target.pattern.value
+        const side = event.target.side.value
+        const pattern = []
+
+        patternFilter.map((obj) => pattern.push(obj.value))
 
         const filters = [{
             type: 'symbol',
             value: symbol
         }, {
             type: 'pattern',
-            value: pattern
+            value: patternFilter.join(',')
+        }, {
+            type: 'side',
+            value: side
         }]
 
-        if (symbol === '' && pattern === '') {
+        if (symbol === '' && patternFilter.join(',') === '' && side === '') {
             history.push({
                 pathname: '/dashboard'
             })
@@ -216,25 +239,53 @@ const Dashboard2 = ({user}) => {
 
                             <div class="col-6">
                                 <form className='filter-box' onSubmit={handleSubmitFilter}>
-                                    <br/>
-                                    <input
-                                        className='filter-input'
-                                        placeholder="Type Symbol Here ..."
-                                        type="text"
-                                        id="symbol"
-                                        name="symbol"
-                                        onChange={(e) => setSymbolFilter(e.target.value)}
-                                        value={symbolFilter}
-                                    />
+                                <h4>Filters</h4>
+                                    <div className="row">
+                                        <div class="col-6 mb-1">
+                                            <input
+                                                className='filter-input'
+                                                placeholder="Type Symbol Here ..."
+                                                type="text"
+                                                id="symbol"
+                                                name="symbol"
+                                                onChange={(e) => setSymbolFilter(e.target.value)}
+                                                value={symbolFilter}
+                                            />
+                                        </div>
 
-                                    <select className='filter-select' name="pattern">
-                                        <option value="" selected={patternFilter === null || patternFilter === '' ? 'selected' : ''}>Select Pattern</option>
-                                        {patterns.map((pattern) => 
-                                            <option value={pattern.pattern_slug} selected={patternFilter === pattern.pattern_slug}>{pattern.pattern_name}</option>
-                                        )}
-                                    </select>
+                                        <div class="col-6 mb-1">
+                                            <select className='filter-select full-width' name="side">
+                                                <option value="" selected={sideFilter === null || sideFilter === '' ? 'selected' : ''}>Select Side</option>
+                                                <option value="Both" selected={sideFilter === "Both"}>Both</option>
+                                                <option value="SS" selected={sideFilter === "SS"}>SS</option>
+                                                <option value="B" selected={sideFilter === "B"}>B</option>
+                                            </select>
+                                        </div>
 
-                                    <button type="submit">Filter</button>
+                                        <div class="col-12">
+                                            <Select
+                                                onChange={(pattern) => setPatternFilter(pattern)}
+                                                defaultValue={patternFilter}
+                                                name="pattern"
+                                                className='mb-1'
+                                                isMulti
+                                                options={patterns}
+                                                styles={{
+                                                    control: base => ({
+                                                      ...base,
+                                                      color: "black"
+                                                    }),
+                                                    menu: base => ({
+                                                      ...base,
+                                                      color: "black"
+                                                    })
+                                                }}
+                                            />
+                                            
+                                            <button type="submit" className='full-width'>Filter</button>
+                                        </div>
+                                    </div>
+
                                 </form>
                             </div>
                         </div>
