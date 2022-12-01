@@ -5,12 +5,16 @@
     border-spacing: 0;
     overflow: hidden;
     margin:40px 0;
+    text-align:right;
     thead tr {
         background:rgba(0,0,0,.4);
         th {
             color:#eee;
             padding:14px 24px;
             font-size:15px;
+            width:25%;
+        }
+        th:first-child {
             text-align: left;
         }
     }
@@ -21,6 +25,7 @@
         td:first-child {
             color:#ddd;
             font-weight: $font_weight_2;
+            text-align: left;
         }
         tr.child td:first-child {
             color:#ababab;
@@ -29,6 +34,13 @@
         td {
             color:#ababab;
             // width:50px;
+
+            &.red {
+                color:red
+            }
+            &.green {
+                color:#0c9;
+            }
         }
         tr.child, tr.child:hover {
             background:rgba(0,0,0,.2); 
