@@ -31,7 +31,7 @@ const Dashboard2 = ({user}) => {
     let [profitAllTime, setProfitAllTime] = useState(0);
 
     // Data Filter
-    let [dateFrom, setDateFrom] = useState(new Date('01-01-2020'));
+    let [dateFrom, setDateFrom] = useState(new Date('01-01-2022'));
     let [dateTo, setDateTo] = useState(new Date());
 
     const getPatterns = async () => {
@@ -181,9 +181,9 @@ const Dashboard2 = ({user}) => {
             <div className="not-sidebar">
                 <div className="inner">
                     <ToastContainer />
+
                     {/* ------------------------------------------- */}
                     <h1>Dashboard</h1>
-
                     <div className="container">
                         <div className="row">
                             <div className="col-6">
@@ -199,7 +199,6 @@ const Dashboard2 = ({user}) => {
                                             endDate={dateTo}
                                         />
                                     </div>
-
                                     <div className="col-6">
                                         <h4>To</h4>
                                         <DatePicker
@@ -226,14 +225,12 @@ const Dashboard2 = ({user}) => {
                                         onChange={(e) => setSymbolFilter(e.target.value)}
                                         value={symbolFilter}
                                     />
-
                                     <select className='filter-select' name="pattern">
                                         <option value="" selected={patternFilter === null || patternFilter === '' ? 'selected' : ''}>Select Pattern</option>
                                         {patterns.map((pattern) => 
                                             <option value={pattern.pattern_slug} selected={patternFilter === pattern.pattern_slug}>{pattern.pattern_name}</option>
                                         )}
                                     </select>
-
                                     <button type="submit">Filter</button>
                                 </form>
                             </div>
