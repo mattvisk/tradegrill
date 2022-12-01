@@ -43,6 +43,7 @@ const Dashboard2 = ({user}) => {
         
         for (const pattern of data) {
             tempPattern.push({
+                id: pattern.id,
                 value: pattern.pattern_slug,
                 label: pattern.pattern_name
             })
@@ -104,28 +105,26 @@ const Dashboard2 = ({user}) => {
         
         const symbol = event.target.symbol.value
         const side = event.target.side.value
-        const pattern = []
-
-        patternFilter.map((obj) => pattern.push(obj.value))
 
         const filters = [{
             type: 'symbol',
             value: symbol
         }, {
             type: 'pattern',
-            value: patternFilter.join(',')
+            value: patternFilter
         }, {
             type: 'side',
             value: side
         }]
 
-        if (symbol === '' && patternFilter.join(',') === '' && side === '') {
+        if (symbol === '' && patternFilter === '' && side === '') {
             history.push({
                 pathname: '/dashboard'
             })
         } else {
             let query = `?`
             filters.map((filter) => filter.value !== '' && filter.value !== null ? query += `${filter.type}=${filter.value}&` : '')
+            console.log('query', query)
             history.push({
                 pathname: '/dashboard',
                 search: query
@@ -135,12 +134,36 @@ const Dashboard2 = ({user}) => {
         getData()
     }
 
+    const handlePatternFilter = (pattern) => {
+        const data = []
+        pattern.map((obj) => data.push(obj.value))
+        setPatternFilter(data.join(','))
+    }
+
     const handleDateFilter = (type, value) => {
         if (type === 'date_from') {
             setDateFrom(value)
         } else {
             setDateTo(value)
         }
+    }
+
+    const getDefaultValuePatternFilter = () => {
+        const temp = []
+
+        if (!patternFilter) {
+            return temp
+        }
+
+        const filter = patternFilter.split(',')
+
+        patterns.map((obj) => {
+            if (filter.includes(obj.value)) {
+                temp.push({value: obj.value, label: obj.label})
+            }
+        })
+        console.log('temp', temp)
+        return temp
     }
 
     useEffect(() => {
@@ -256,16 +279,15 @@ const Dashboard2 = ({user}) => {
                                         <div class="col-6 mb-1">
                                             <select className='filter-select full-width' name="side">
                                                 <option value="" selected={sideFilter === null || sideFilter === '' ? 'selected' : ''}>Select Side</option>
-                                                <option value="Both" selected={sideFilter === "Both"}>Both</option>
-                                                <option value="SS" selected={sideFilter === "SS"}>SS</option>
-                                                <option value="B" selected={sideFilter === "B"}>B</option>
+                                                <option value="SS" selected={sideFilter === "SS"}>Short</option>
+                                                <option value="B" selected={sideFilter === "B"}>Long</option>
                                             </select>
                                         </div>
 
                                         <div class="col-12">
                                             <Select
-                                                onChange={(pattern) => setPatternFilter(pattern)}
-                                                defaultValue={patternFilter}
+                                                onChange={(pattern) => handlePatternFilter(pattern)}
+                                                value={getDefaultValuePatternFilter()}
                                                 name="pattern"
                                                 className='mb-1'
                                                 isMulti
@@ -377,7 +399,7 @@ const Dashboard2 = ({user}) => {
                                         <select onChange={(event) => handlePatternChange(event, trades.trades)}>
                                             <option value="">None</option>
                                             {patterns.map((pattern) => 
-                                                <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.pattern_name}</option>
+                                                <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.label}</option>
                                             )}
                                         </select>
                                     </td>
