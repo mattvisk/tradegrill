@@ -177,6 +177,45 @@ const Dashboard2 = ({user}) => {
                 {/* <Link to="/journal"><span class="material-icons">upload</span>Upload Trades</Link> */}
                 <button><span class="material-icons">upload</span>Upload Trades <UploadTrades user={user} callback={getData} /></button>
                 <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>
+                <hr />
+
+                <h4>Date</h4>
+                <DatePicker
+                    className='filter-input'
+                    selected={dateFrom}
+                    onChange={(date) => handleDateFilter('date_from', date)}
+                    selectsStart
+                    startDate={dateFrom}
+                    endDate={dateTo}
+                />
+                <DatePicker
+                    className='filter-input'
+                    selected={dateTo}
+                    onChange={(date) => handleDateFilter('date_to', date)}
+                    selectsEnd
+                    startDate={dateFrom}
+                    endDate={dateTo}
+                />
+                
+                <form className='filter-box' onSubmit={handleSubmitFilter}>
+                    <br/>
+                    <input
+                        className='filter-input'
+                        placeholder="Type Symbol Here ..."
+                        type="text"
+                        id="symbol"
+                        name="symbol"
+                        onChange={(e) => setSymbolFilter(e.target.value)}
+                        value={symbolFilter}
+                    />
+                    <select className='filter-select' name="pattern">
+                        <option value="" selected={patternFilter === null || patternFilter === '' ? 'selected' : ''}>Select Pattern</option>
+                        {patterns.map((pattern) => 
+                            <option value={pattern.pattern_slug} selected={patternFilter === pattern.pattern_slug}>{pattern.pattern_name}</option>
+                        )}
+                    </select>
+                    <button type="submit">Filter</button>
+                </form>
             </div>
             <div className="not-sidebar">
                 <div className="inner">
@@ -184,70 +223,21 @@ const Dashboard2 = ({user}) => {
 
                     {/* ------------------------------------------- */}
                     <h1>Dashboard</h1>
-                    <div className="container">
-                        <div className="row">
-                            <div className="col-6">
-                                <div className="row">
-                                    <div className="filter-box col-6">
-                                        <h4>From</h4>
-                                        <DatePicker
-                                            className='filter-input'
-                                            selected={dateFrom}
-                                            onChange={(date) => handleDateFilter('date_from', date)}
-                                            selectsStart
-                                            startDate={dateFrom}
-                                            endDate={dateTo}
-                                        />
-                                    </div>
-                                    <div className="col-6">
-                                        <h4>To</h4>
-                                        <DatePicker
-                                            className='filter-input'
-                                            selected={dateTo}
-                                            onChange={(date) => handleDateFilter('date_to', date)}
-                                            selectsEnd
-                                            startDate={dateFrom}
-                                            endDate={dateTo}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <form className='filter-box' onSubmit={handleSubmitFilter}>
-                                    <br/>
-                                    <input
-                                        className='filter-input'
-                                        placeholder="Type Symbol Here ..."
-                                        type="text"
-                                        id="symbol"
-                                        name="symbol"
-                                        onChange={(e) => setSymbolFilter(e.target.value)}
-                                        value={symbolFilter}
-                                    />
-                                    <select className='filter-select' name="pattern">
-                                        <option value="" selected={patternFilter === null || patternFilter === '' ? 'selected' : ''}>Select Pattern</option>
-                                        {patterns.map((pattern) => 
-                                            <option value={pattern.pattern_slug} selected={patternFilter === pattern.pattern_slug}>{pattern.pattern_name}</option>
-                                        )}
-                                    </select>
-                                    <button type="submit">Filter</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
                     <table className="table-a">
                         <thead>
                             <tr>
                                 <th>Profit</th>
                                 <th>Trades</th>
+                                <th>Winning Trades</th>
+                                <th>Losing Trades</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>{ profitAllTime }</td>
                                 <td>{ trades.length }</td>
+                                <td>#</td>
+                                <td>#</td>
                             </tr>
                         </tbody>
                     </table>
