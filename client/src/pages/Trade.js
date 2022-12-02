@@ -9,16 +9,15 @@ const Trades = (props) => {
 
   
   //const { urlDate, urlSymbol, urlDays } = useParams();
-  let { urlDate, urlSymbol, urlDays } = useParams();
+  let { urlDate, urlSymbol, urlDaysBack, urlDaysForward } = useParams();
   if(!urlSymbol){
   urlSymbol = props.symbol;
   urlDate = props.dateIn;
-  urlDays = props.days;
+  urlDaysForward = props.days;
   }
   
-  
-
-  let days = urlDays ? urlDays : 0;
+  let daysBack = urlDaysBack ? urlDaysBack : 0;
+  let daysForward = urlDaysForward ? urlDaysForward : 0;
   document.title = urlSymbol;
   const [chartData, setChartData] = useState(false);
   const [resolution, setResolution] = useState(1);
@@ -40,8 +39,8 @@ const Trades = (props) => {
     Axios
     .post("http://" + window.location.hostname + ":3001" + "/viewChart2", {
       symbol: urlSymbol,
-      date_from: add(new Date(urlDate), { days: days * -1 }),
-      date_to: add(new Date(urlDate), { days: 1 }),
+      date_from: add(new Date(urlDate), { days: daysBack * -1 }),
+      date_to: add(new Date(urlDate), { days: daysForward + 1 }),
       resolution: resolution,
     })
     .then((response) => {
