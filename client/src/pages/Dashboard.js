@@ -6,6 +6,7 @@ import Format from 'date-fns/format';
 import { BarChart, Area, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart } from 'recharts';
 import { ToastContainer, toast } from 'react-toastify';
 import DatePicker from "react-datepicker";
+import Select from 'react-select';
 import "react-datepicker/dist/react-datepicker.css";
 import 'material-icons/iconfont/material-icons.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -24,6 +25,7 @@ const Dashboard2 = ({user}) => {
     // let [recentTrades, setRecentTrades ] = useState([]);
     const [symbolFilter, setSymbolFilter ] = useState(null);
     const [patternFilter, setPatternFilter ] = useState(null);
+    const [sideFilter, setSideFilter ] = useState(null);
     const [patterns, setPatterns ] = useState([]);
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
@@ -36,7 +38,17 @@ const Dashboard2 = ({user}) => {
 
     const getPatterns = async () => {
         const { data } = await Axios.get("http://"+window.location.hostname+":3001/patterns")
-        setPatterns(data)
+        
+        const tempPattern = []
+        
+        for (const pattern of data) {
+            tempPattern.push({
+                id: pattern.id,
+                value: pattern.pattern_slug,
+                label: pattern.pattern_name
+            })
+        }
+        setPatterns(tempPattern)
     }
 
     // Http Request: Get Trade Data
@@ -46,9 +58,11 @@ const Dashboard2 = ({user}) => {
         let paramsUrl = new URLSearchParams(search)
         const symbol = paramsUrl.get('symbol')
         const pattern = paramsUrl.get('pattern')
+        const side = paramsUrl.get('side')
 
         setSymbolFilter(symbol)
         setPatternFilter(pattern)
+        setSideFilter(side)
 
         const params = {
             'dateFrom': Format(dateFrom, 'yyyy-MM-dd'), 
@@ -61,6 +75,10 @@ const Dashboard2 = ({user}) => {
 
         if (pattern && pattern !== '') {
             params.pattern = pattern
+        }
+
+        if (side && side !== '') {
+            params.side = side
         }
 
         Axios.post("http://"+window.location.hostname+":3001/get-trades", params).then((response)=> {
@@ -84,25 +102,29 @@ const Dashboard2 = ({user}) => {
 
     const handleSubmitFilter = (event) => {
         event.preventDefault();
- 
+        
         const symbol = event.target.symbol.value
-        const pattern = event.target.pattern.value
+        const side = event.target.side.value
 
         const filters = [{
             type: 'symbol',
             value: symbol
         }, {
             type: 'pattern',
-            value: pattern
+            value: patternFilter
+        }, {
+            type: 'side',
+            value: side
         }]
 
-        if (symbol === '' && pattern === '') {
+        if (symbol === '' && patternFilter === '' && side === '') {
             history.push({
                 pathname: '/dashboard'
             })
         } else {
             let query = `?`
             filters.map((filter) => filter.value !== '' && filter.value !== null ? query += `${filter.type}=${filter.value}&` : '')
+            console.log('query', query)
             history.push({
                 pathname: '/dashboard',
                 search: query
@@ -112,12 +134,36 @@ const Dashboard2 = ({user}) => {
         getData()
     }
 
+    const handlePatternFilter = (pattern) => {
+        const data = []
+        pattern.map((obj) => data.push(obj.value))
+        setPatternFilter(data.join(','))
+    }
+
     const handleDateFilter = (type, value) => {
         if (type === 'date_from') {
             setDateFrom(value)
         } else {
             setDateTo(value)
         }
+    }
+
+    const getDefaultValuePatternFilter = () => {
+        const temp = []
+
+        if (!patternFilter) {
+            return temp
+        }
+
+        const filter = patternFilter.split(',')
+
+        patterns.map((obj) => {
+            if (filter.includes(obj.value)) {
+                temp.push({value: obj.value, label: obj.label})
+            }
+        })
+        console.log('temp', temp)
+        return temp
     }
 
     useEffect(() => {
@@ -177,67 +223,107 @@ const Dashboard2 = ({user}) => {
                 {/* <Link to="/journal"><span class="material-icons">upload</span>Upload Trades</Link> */}
                 <button><span class="material-icons">upload</span>Upload Trades <UploadTrades user={user} callback={getData} /></button>
                 <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>
-                <hr />
-
-                <h4>Date</h4>
-                <DatePicker
-                    className='filter-input'
-                    selected={dateFrom}
-                    onChange={(date) => handleDateFilter('date_from', date)}
-                    selectsStart
-                    startDate={dateFrom}
-                    endDate={dateTo}
-                />
-                <DatePicker
-                    className='filter-input'
-                    selected={dateTo}
-                    onChange={(date) => handleDateFilter('date_to', date)}
-                    selectsEnd
-                    startDate={dateFrom}
-                    endDate={dateTo}
-                />
-                
-                <form className='filter-box' onSubmit={handleSubmitFilter}>
-                    <br/>
-                    <input
-                        className='filter-input'
-                        placeholder="Type Symbol Here ..."
-                        type="text"
-                        id="symbol"
-                        name="symbol"
-                        onChange={(e) => setSymbolFilter(e.target.value)}
-                        value={symbolFilter}
-                    />
-                    <select className='filter-select' name="pattern">
-                        <option value="" selected={patternFilter === null || patternFilter === '' ? 'selected' : ''}>Select Pattern</option>
-                        {patterns.map((pattern) => 
-                            <option value={pattern.pattern_slug} selected={patternFilter === pattern.pattern_slug}>{pattern.pattern_name}</option>
-                        )}
-                    </select>
-                    <button type="submit">Filter</button>
-                </form>
             </div>
             <div className="not-sidebar">
                 <div className="inner">
                     <ToastContainer />
-
                     {/* ------------------------------------------- */}
                     <h1>Dashboard</h1>
+
+                    <div className="container">
+                        <div className="row">
+                            <div className="col-6">
+                                <div className="row">
+                                    <div className="filter-box col-6">
+                                        <h4>From</h4>
+                                        <DatePicker
+                                            className='filter-input'
+                                            selected={dateFrom}
+                                            onChange={(date) => handleDateFilter('date_from', date)}
+                                            selectsStart
+                                            startDate={dateFrom}
+                                            endDate={dateTo}
+                                        />
+                                    </div>
+
+                                    <div className="col-6">
+                                        <h4>To</h4>
+                                        <DatePicker
+                                            className='filter-input'
+                                            selected={dateTo}
+                                            onChange={(date) => handleDateFilter('date_to', date)}
+                                            selectsEnd
+                                            startDate={dateFrom}
+                                            endDate={dateTo}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <form className='filter-box' onSubmit={handleSubmitFilter}>
+                                <h4>Filters</h4>
+                                    <div className="row">
+                                        <div class="col-6 mb-1">
+                                            <input
+                                                className='filter-input'
+                                                placeholder="Type Symbol Here ..."
+                                                type="text"
+                                                id="symbol"
+                                                name="symbol"
+                                                onChange={(e) => setSymbolFilter(e.target.value)}
+                                                value={symbolFilter}
+                                            />
+                                        </div>
+
+                                        <div class="col-6 mb-1">
+                                            <select className='filter-select full-width' name="side">
+                                                <option value="" selected={sideFilter === null || sideFilter === '' ? 'selected' : ''}>Select Side</option>
+                                                <option value="SS" selected={sideFilter === "SS"}>Short</option>
+                                                <option value="B" selected={sideFilter === "B"}>Long</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <Select
+                                                onChange={(pattern) => handlePatternFilter(pattern)}
+                                                value={getDefaultValuePatternFilter()}
+                                                name="pattern"
+                                                className='mb-1'
+                                                isMulti
+                                                options={patterns}
+                                                styles={{
+                                                    control: base => ({
+                                                      ...base,
+                                                      color: "black"
+                                                    }),
+                                                    menu: base => ({
+                                                      ...base,
+                                                      color: "black"
+                                                    })
+                                                }}
+                                            />
+                                            
+                                            <button type="submit" className='full-width'>Filter</button>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                     <table className="table-a">
                         <thead>
                             <tr>
                                 <th>Profit</th>
                                 <th>Trades</th>
-                                <th>Winning Trades</th>
-                                <th>Losing Trades</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>{ profitAllTime }</td>
                                 <td>{ trades.length }</td>
-                                <td>#</td>
-                                <td>#</td>
                             </tr>
                         </tbody>
                     </table>
@@ -248,8 +334,8 @@ const Dashboard2 = ({user}) => {
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={tradesByDay} margin={margin} fontSize={12}>
                                 {/* <XAxis name="date" /> */}
-                                <CartesianGrid strokeDasharray="1" stroke="rgba(255,255,255,.15)" />
-                                <YAxis tickCount={8}/>
+                                <CartesianGrid strokeDasharray="1" stroke="rgba(255,255,255,.08)" />
+                                <YAxis tickCount={10}/>
                                 <Tooltip />
                                 <Line dataKey="running_profit" stroke="#8884d8" dot={false} />
                             </LineChart>
@@ -260,10 +346,9 @@ const Dashboard2 = ({user}) => {
                     <div className="new-chart">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={tradesByDay} margin={margin} fontSize={12}>
-                                <XAxis dataKey="symbol" />
-                                <YAxis/>
+                                <YAxis tickCount={10} />
                                 <Tooltip />
-                                <Legend />
+                                <CartesianGrid strokeDasharray="1" stroke="rgba(255,255,255,.08)" />
                                 <Bar name="Profit Loss" dataKey="profit_loss"> 
                                     { tradesByDay.map((trade) => (
                                         <Cell key={trade.id} fill={trade.profit_loss >= 0 ? '#0c9' : '#c22' }/>
@@ -296,6 +381,8 @@ const Dashboard2 = ({user}) => {
                                 <th className="rt">Profit/Loss</th>
                                 <th className="rt">Trades</th>
                                 <th className="rt">Pattern</th>
+                                <th className="rt">Float</th>
+                                <th className="rt">Market</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -303,26 +390,33 @@ const Dashboard2 = ({user}) => {
                             <>
                                 <tr key={trades.id} className={trades.showDetails && 'open'}>
                                     <td>
-                                        <Link to={`trades/${trades.symbol}/${trades.date}`}>{trades.symbol}</Link>
+                                        <Link to={`trades/${trades.symbol}/${trades.date}/8`}>{trades.symbol}</Link>
                                         <br />
                                         {trades.date}
                                     </td>
-                                    <td className="rt">{trades.profit_loss.toFixed(2)}</td>
-                                    <td onClick={()=>{showDetails(trades.id)}} className="rt">{trades.trades.length} Open</td>
-                                    <td className="rt">
+                                    <td className={trades.profit_loss >= 0 ? 'green':'red'}>{trades.profit_loss.toFixed(2)}</td>
+                                    <td onClick={()=>{showDetails(trades.id)}} className="rt">{trades.trades.length}</td>
+                                    <td>
                                         <select onChange={(event) => handlePatternChange(event, trades.trades)}>
                                             <option value="">None</option>
                                             {patterns.map((pattern) => 
-                                                <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.pattern_name}</option>
+                                                <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.label}</option>
                                             )}
                                         </select>
+                                    </td>
+                                    <td>
+                                        <input placeholder="Float" />
+                                    </td>
+                                    <td>
+                                        <input placeholder="Market Cap" />
                                     </td>
                                 </tr>
                                 { trades.showDetails === true && trades.trades.map(trade => 
                                     <tr key={trade.id} class="child">
-                                        <td className="">{trade.time_in_nice} - {trade.time_out_nice}</td>
-                                        <td className="rt">{trade.profit_loss.toFixed(2)}</td>
-                                        <td className="rt">{trade.side}</td>
+                                        <td>{trade.time_in_nice} - {trade.time_out_nice}</td>
+                                        <td className={trade.profit_loss >= 0 ? 'green':'red'}>{trade.profit_loss.toFixed(2)}</td>
+                                        <td>-</td>
+                                        <td className="rt">{trade.side == 'SS' ? 'Short':'Long'}</td>
                                     </tr> 
                                 )}                                
                             </>
