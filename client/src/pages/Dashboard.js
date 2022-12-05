@@ -27,14 +27,40 @@ const Dashboard2 = ({user}) => {
     const [patternFilter, setPatternFilter ] = useState(null);
     const [sideFilter, setSideFilter ] = useState(null);
     const [patterns, setPatterns ] = useState([]);
+    const [scrollY, setScrollY] = useState();
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
     let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
     let [profitAllTime, setProfitAllTime] = useState(0);
-
-    // Data Filter
     let [dateFrom, setDateFrom] = useState(new Date('01-01-2022'));
     let [dateTo, setDateTo] = useState(new Date());
+    const [mousePos, setMousePos] = useState({});
+
+
+    /* Get Mouse Coordinates
+    -------------------------------*/
+    useEffect(() => {
+        const handleMouseMove = (event) => {
+            setMousePos({ x: event.clientX, y: event.clientY });
+            console.log(event.clicentY);
+        };
+    
+        window.addEventListener('mousemove', handleMouseMove);
+    
+        return () => {
+          window.removeEventListener(
+            'mousemove',
+            handleMouseMove
+          );
+        };
+      }, []);
+
+
+
+
+
+
+
 
     const getPatterns = async () => {
         const { data } = await Axios.get("http://"+window.location.hostname+":3001/patterns")
@@ -165,6 +191,7 @@ const Dashboard2 = ({user}) => {
         console.log('temp', temp)
         return temp
     }
+    
 
     useEffect(() => {
         getData()
@@ -223,109 +250,88 @@ const Dashboard2 = ({user}) => {
                 {/* <Link to="/journal"><span class="material-icons">upload</span>Upload Trades</Link> */}
                 <button><span class="material-icons">upload</span>Upload Trades <UploadTrades user={user} callback={getData} /></button>
                 <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>
+                <div className="filters container">
+
+                    <form className=' lizard-form' onSubmit={handleSubmitFilter}>
+                        <label>Date</label>
+                        <DatePicker
+                            selected={dateFrom}
+                            onChange={(date) => handleDateFilter('date_from', date)}
+                            selectsStart
+                            startDate={dateFrom}
+                            endDate={dateTo}
+                        />
+                        <DatePicker
+                            selected={dateTo}
+                            onChange={(date) => handleDateFilter('date_to', date)}
+                            selectsEnd
+                            startDate={dateFrom}
+                            endDate={dateTo}
+                        />
+                        <label>Symbol</label>
+                        <input class="uppercase"
+                            placeholder="Type Symbol Here ..."
+                            type="text"
+                            id="symbol"
+                            name="symbol"
+                            onChange={(e) => setSymbolFilter(e.target.value)}
+                            value={symbolFilter}
+                        />
+                        <label>Type</label>
+                        <select name="side">
+                            <option value="" selected={sideFilter === null || sideFilter === '' ? 'selected' : ''}>Select Side</option>
+                            <option value="SS" selected={sideFilter === "SS"}>Short</option>
+                            <option value="B" selected={sideFilter === "B"}>Long</option>
+                        </select>
+
+                        <hr></hr>
+
+                        {/* This is awesome, but let's just use checkboxes for now --- keep this here though commented out */}
+                        <Select
+                            onChange={(pattern) => handlePatternFilter(pattern)}
+                            value={getDefaultValuePatternFilter()}
+                            name="pattern"
+                            className='mb-1'
+                            isMulti
+                            options={patterns}
+                            styles={{
+                                control: base => ({
+                                    ...base,
+                                    color: "black"
+                                }),
+                                menu: base => ({
+                                    ...base,
+                                    color: "black"
+                                })
+                            }}
+                        />
+                        <button type="submit" className='full-width'>Filter</button>
+                    </form>
+                </div>
             </div>
             <div className="not-sidebar">
                 <div className="inner">
                     <ToastContainer />
-                    {/* ------------------------------------------- */}
+                    {/* -------------------------------------------
                     <h1>Dashboard</h1>
 
-                    <div className="container">
-                        <div className="row">
-                            <div className="col-6">
-                                <div className="row">
-                                    <div className="filter-box col-6">
-                                        <h4>From</h4>
-                                        <DatePicker
-                                            className='filter-input'
-                                            selected={dateFrom}
-                                            onChange={(date) => handleDateFilter('date_from', date)}
-                                            selectsStart
-                                            startDate={dateFrom}
-                                            endDate={dateTo}
-                                        />
-                                    </div>
+                    <div>
+                    The mouse is at position{' '}
+                    <b>
+                        ({mousePos.x}, {mousePos.y})
+                    </b>
+                    </div> */}
+                    
 
-                                    <div className="col-6">
-                                        <h4>To</h4>
-                                        <DatePicker
-                                            className='filter-input'
-                                            selected={dateTo}
-                                            onChange={(date) => handleDateFilter('date_to', date)}
-                                            selectsEnd
-                                            startDate={dateFrom}
-                                            endDate={dateTo}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <form className='filter-box' onSubmit={handleSubmitFilter}>
-                                <h4>Filters</h4>
-                                    <div className="row">
-                                        <div class="col-6 mb-1">
-                                            <input
-                                                className='filter-input'
-                                                placeholder="Type Symbol Here ..."
-                                                type="text"
-                                                id="symbol"
-                                                name="symbol"
-                                                onChange={(e) => setSymbolFilter(e.target.value)}
-                                                value={symbolFilter}
-                                            />
-                                        </div>
-
-                                        <div class="col-6 mb-1">
-                                            <select className='filter-select full-width' name="side">
-                                                <option value="" selected={sideFilter === null || sideFilter === '' ? 'selected' : ''}>Select Side</option>
-                                                <option value="SS" selected={sideFilter === "SS"}>Short</option>
-                                                <option value="B" selected={sideFilter === "B"}>Long</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="col-12">
-                                            <Select
-                                                onChange={(pattern) => handlePatternFilter(pattern)}
-                                                value={getDefaultValuePatternFilter()}
-                                                name="pattern"
-                                                className='mb-1'
-                                                isMulti
-                                                options={patterns}
-                                                styles={{
-                                                    control: base => ({
-                                                      ...base,
-                                                      color: "black"
-                                                    }),
-                                                    menu: base => ({
-                                                      ...base,
-                                                      color: "black"
-                                                    })
-                                                }}
-                                            />
-                                            
-                                            <button type="submit" className='full-width'>Filter</button>
-                                        </div>
-                                    </div>
-
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <table className="table-a">
-                        <thead>
-                            <tr>
-                                <th>Profit</th>
-                                <th>Trades</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{ profitAllTime }</td>
-                                <td>{ trades.length }</td>
-                            </tr>
-                        </tbody>
+                    <table className="viper-textbox">
+                        <section>
+                            <span>Profit</span>
+                            <p>{ profitAllTime }</p>
+                        </section>
+                        <section>
+                            <span>Trades</span>
+                            <p>{ trades.length }</p>
+                        </section>
                     </table>
                     
                     {/* ------------------------------------------- */}

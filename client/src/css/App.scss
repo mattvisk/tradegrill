@@ -5,14 +5,17 @@
 html {
   overflow: -moz-scrollbars-vertical;
   overflow-y: scroll;
+  
+}
+html * {
+  box-sizing: border-box;
 }
 body {
   font-family: $font_2;
   font-weight:100;
   font-size: 14px;
   color: $TEXT;
-  background: $BG;
-  margin: 0;
+  background: $BG;margin: 0;
 }
 
 
@@ -61,6 +64,9 @@ h3 {
   color: #8984d8;
   display: inline-block;
   margin: 0 0 20px
+}
+.uppercase {
+  text-transform: uppercase;
 }
 
 /* Text
@@ -192,7 +198,49 @@ li {
   border-radius: 3px;
   font-family: "Nunito", sans-serif;
   margin: 0 0 $size_1;
+}
+.lizard-form {
+  bottom:30px;
+  width:240px;
+  padding:30px 14px;
+  label {
+    margin:20px 0 6px;
+    display:block;
+  }
+  input,select,textarea {
+    font-weight: 200;
+    border: none;
+    line-height: 38px;
+    padding: 0 9px;
+    width: 240px;
+    font-size: 18px;
+    font-weight: 400;
+    background: rgba(255,255,255,.1);
+    color: #333;
+    /* border: 1px solid #ddd; */
+    margin: 2px 0 0;
+    border-radius: 4px;
+    font-family: "Nunito";
+    margin: 4px 0;
+    color: #ffffff9c;
+    font-size: 16px;
+  }
+  select {
+    height:38px;
+    width:240px;
+  }
+}
 
+.input-b {
+  background: #111;
+  box-shadow: inset 0px 2px 2px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  font-size: 1.2em;
+  color:#ddd;
+  padding: 8px;
+  border-radius: 3px;
+  font-family: "Nunito", sans-serif;
+  margin: 0 0 $size_1;
 }
 .input-upload {
   input[type="file"]::file-selector-button {
@@ -389,7 +437,7 @@ li {
   flex-wrap: wrap;
 }
 .sidebar {
-  flex-basis: 14rem;
+  flex-basis: 320px;
   flex-grow: 1;
   background:$HEADER_BG_MUTE;
   padding: 22px 14px;
@@ -448,52 +496,20 @@ li {
   }
 }
 
-.filter-box {
-  float: right;
-}
-
-.filter-input {
-  border: 0;
-  font-family: "Nunito";
-  background: #eee;
-  height: 40px;
-  padding: 0 10px;
-  border-width: 0px;
-  border-radius: 8px;
-  font-size: 13px;
-  -webkit-appearance: none;
-  appearance: none;
-  line-height: 2em;
-  box-shadow: none;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #3b1a5a;
-  border-radius: 8px;
-}
-
-.filter-select {
-  border: 0;
-  font-family: "Nunito";
-  background: #eee;
-  height: 40px;
-  padding: 0 10px;
-  border-width: 0px;
-  border-radius: 8px;
-  font-size: 13px;
-  -webkit-appearance: none;
-  appearance: none;
-  line-height: 2em;
-  box-shadow: none;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #3b1a5a;
-  border-radius: 8px;
-}
-
-.full-width {
-  width: 100%
-}
-
-.mb-1 {
-  margin-bottom: 1rem;
+.viper-textbox {
+  display:flex;
+  font-size:18px;
+  // border:1px solid rgba(255,255,255,.1);
+  padding:0 0 20px 0;
+  section {
+    border-right:1px solid rgba(255,255,255,.1);
+    margin-right:2em;
+    padding-right:2em;
+  }
+  * {
+    margin:0;
+  }
+  p {
+    font-size:2em;
+  }
 }
