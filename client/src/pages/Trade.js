@@ -13,9 +13,6 @@ const Trades = (props) => {
   if(!urlSymbol){
   urlSymbol = props.symbol;
   urlDate = props.dateIn;
-  urlDaysForward = props.days;
-  }
-  
   let daysBack = urlDaysBack ? urlDaysBack : 0;
   let daysForward = urlDaysForward ? urlDaysForward : 0;
   document.title = urlSymbol;

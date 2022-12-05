@@ -381,6 +381,8 @@ const Dashboard2 = ({user}) => {
                                 <th className="rt">Profit/Loss</th>
                                 <th className="rt">Trades</th>
                                 <th className="rt">Pattern</th>
+                                <th className="rt">Float</th>
+                                <th className="rt">Market</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -402,6 +404,12 @@ const Dashboard2 = ({user}) => {
                                             )}
                                         </select>
                                         <input placeholder="Float" />
+                                        <input placeholder="Market Cap" />
+                                    </td>
+                                    <td>
+                                        <input placeholder="Float" />
+                                    </td>
+                                    <td>
                                         <input placeholder="Market Cap" />
                                     </td>
                                 </tr>
