@@ -443,18 +443,22 @@ const InsertCsvData = async (req, res) => {
 --------------------------------------------*/
 app.post('/get-trades', async (req, res) => {
     
-    let pattern = null
+    let pattern = []
     
     if (req.body.pattern) {
-        const [patternSelected] = await database.execute("SELECT * FROM patterns WHERE pattern_slug = ? LIMIT 1", [req.body.pattern])
+        const tempPattern = req.body.pattern.split(',').join("','")
+        const [patternSelected] = await database.execute(`SELECT * FROM patterns WHERE pattern_slug IN ('${tempPattern}')`)
 
-        if (patternSelected[0]) {
-            pattern = patternSelected[0]
+        if (patternSelected && patternSelected.length > 0) {
+            for (const patternObj of patternSelected) {
+                pattern.push(patternObj.id)
+            }
         }
     }
 
     const symbolQuery = req.body.symbol ? 'AND symbol = ?' : '';
-    const patternQuery = pattern ? 'AND pattern_id = ?' : '';
+    const patternQuery = pattern.length > 0 ? `AND pattern_id IN ('${pattern.join("','")}')` : '';
+    const sideQuery = req.body.side ? 'AND side = ?' : '';
 
     const params =  [1, req.body.dateFrom, req.body.dateTo] // <-- temporarily hard coded member id
     
@@ -462,8 +466,8 @@ app.post('/get-trades', async (req, res) => {
         params.push(req.body.symbol)
     }
 
-    if (pattern) {
-        params.push(pattern.id)
+    if (req.body.side) {
+        params.push(req.body.side)
     }
 
     db.query(
@@ -478,6 +482,7 @@ app.post('/get-trades', async (req, res) => {
         AND date_out <= ? 
         ${symbolQuery}
         ${patternQuery}
+        ${sideQuery}
         ORDER BY time_out ASC`, params, (err, trades) => {
 
         /* Trades: By Ticker & Day 

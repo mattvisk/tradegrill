@@ -403,6 +403,8 @@ const Dashboard2 = ({user}) => {
                                                 <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.label}</option>
                                             )}
                                         </select>
+                                        <input placeholder="Float" />
+                                        <input placeholder="Market Cap" />
                                     </td>
                                     <td>
                                         <input placeholder="Float" />
