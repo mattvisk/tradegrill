@@ -1,11 +1,11 @@
-.table-a {
+.table-gorilla {
     width:100%;
     border:1px solid rgba(255,255,255,.08);
     border-radius:$size_1;
     border-spacing: 0;
     overflow: hidden;
     margin:40px 0;
-    text-align:right;
+    text-align:left;
     thead tr {
         background:rgba(0,0,0,.4);
         th {
@@ -41,6 +41,10 @@
             &.green {
                 color:#0c9;
             }
+            label {
+                margin:0;
+            }
+                
         }
         tr.child, tr.child:hover {
             background:rgba(0,0,0,.2); 

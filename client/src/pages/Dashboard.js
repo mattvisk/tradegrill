@@ -250,64 +250,63 @@ const Dashboard2 = ({user}) => {
                 {/* <Link to="/journal"><span class="material-icons">upload</span>Upload Trades</Link> */}
                 <button><span class="material-icons">upload</span>Upload Trades <UploadTrades user={user} callback={getData} /></button>
                 <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>
-                <div className="filters container">
 
-                    <form className=' lizard-form' onSubmit={handleSubmitFilter}>
-                        <label>Date</label>
-                        <DatePicker
-                            selected={dateFrom}
-                            onChange={(date) => handleDateFilter('date_from', date)}
-                            selectsStart
-                            startDate={dateFrom}
-                            endDate={dateTo}
-                        />
-                        <DatePicker
-                            selected={dateTo}
-                            onChange={(date) => handleDateFilter('date_to', date)}
-                            selectsEnd
-                            startDate={dateFrom}
-                            endDate={dateTo}
-                        />
-                        <label>Symbol</label>
-                        <input class="uppercase"
-                            placeholder="Type Symbol Here ..."
-                            type="text"
-                            id="symbol"
-                            name="symbol"
-                            onChange={(e) => setSymbolFilter(e.target.value)}
-                            value={symbolFilter}
-                        />
-                        <label>Type</label>
-                        <select name="side">
-                            <option value="" selected={sideFilter === null || sideFilter === '' ? 'selected' : ''}>Select Side</option>
-                            <option value="SS" selected={sideFilter === "SS"}>Short</option>
-                            <option value="B" selected={sideFilter === "B"}>Long</option>
-                        </select>
+                <hr></hr>
+                
+                <h2>Dashboard</h2>
+                <form className='lizard-form form-secondary' onSubmit={handleSubmitFilter}>
+                    <label>Date</label>
+                    <DatePicker
+                        selected={dateFrom}
+                        onChange={(date) => handleDateFilter('date_from', date)}
+                        selectsStart
+                        startDate={dateFrom}
+                        endDate={dateTo}
+                    />
+                    <DatePicker
+                        selected={dateTo}
+                        onChange={(date) => handleDateFilter('date_to', date)}
+                        selectsEnd
+                        startDate={dateFrom}
+                        endDate={dateTo}
+                    />
+                    <label>Symbol</label>
+                    <input class="uppercase"
+                        type="text"
+                        id="symbol"
+                        name="symbol"
+                        onChange={(e) => setSymbolFilter(e.target.value)}
+                        value={symbolFilter}
+                    />
+                    <label>Side</label>
+                    <select name="side">
+                        <option value="" selected={sideFilter === null || sideFilter === '' ? 'selected' : ''}>All</option>
+                        <option value="SS" selected={sideFilter === "SS"}>Short</option>
+                        <option value="B" selected={sideFilter === "B"}>Long</option>
+                    </select>
 
-                        <hr></hr>
 
-                        {/* This is awesome, but let's just use checkboxes for now --- keep this here though commented out */}
-                        <Select
-                            onChange={(pattern) => handlePatternFilter(pattern)}
-                            value={getDefaultValuePatternFilter()}
-                            name="pattern"
-                            className='mb-1'
-                            isMulti
-                            options={patterns}
-                            styles={{
-                                control: base => ({
-                                    ...base,
-                                    color: "black"
-                                }),
-                                menu: base => ({
-                                    ...base,
-                                    color: "black"
-                                })
-                            }}
-                        />
-                        <button type="submit" className='full-width'>Filter</button>
-                    </form>
-                </div>
+                    {/* This is awesome, but let's just use checkboxes for now --- keep this here though commented out */}
+                    <Select
+                        onChange={(pattern) => handlePatternFilter(pattern)}
+                        value={getDefaultValuePatternFilter()}
+                        name="pattern"
+                        className='mb-1'
+                        isMulti
+                        options={patterns}
+                        styles={{
+                            control: base => ({
+                                ...base,
+                                color: "black"
+                            }),
+                            menu: base => ({
+                                ...base,
+                                color: "black"
+                            })
+                        }}
+                    />
+                    <button type="submit" className="btn">Search</button>
+                </form>
             </div>
             <div className="not-sidebar">
                 <div className="inner">
@@ -380,52 +379,57 @@ const Dashboard2 = ({user}) => {
                     </div>
 
                     {/* ------------------------------------------- */}
-                    <table className="table-a">
+                    <table className="table-gorilla form-secondary">
                         <thead>
                             <tr>
                                 <th>Symbol</th>
                                 <th className="rt">Profit/Loss</th>
                                 <th className="rt">Trades</th>
                                 <th className="rt">Pattern</th>
-                                <th className="rt">Float</th>
-                                <th className="rt">Market</th>
                             </tr>
                         </thead>
                         <tbody>
                             { tradesByDaySymbol && tradesByDaySymbol.slice(0).reverse().map((trades) => 
                             <>
                                 <tr key={trades.id} className={trades.showDetails && 'open'}>
-                                    <td>
+                                    <td onClick={()=>{showDetails(trades.id)}} >
                                         <Link to={`trades/${trades.symbol}/${trades.date}/8`}>{trades.symbol}</Link>
                                         <br />
                                         {trades.date}
                                     </td>
-                                    <td className={trades.profit_loss >= 0 ? 'green':'red'}>{trades.profit_loss.toFixed(2)}</td>
+                                    <td onClick={()=>{showDetails(trades.id)}}  className={trades.profit_loss >= 0 ? 'green':'red'}>{trades.profit_loss.toFixed(2)}</td>
                                     <td onClick={()=>{showDetails(trades.id)}} className="rt">{trades.trades.length}</td>
                                     <td>
+                                        { trades.showDetails && <label>Pattern</label> }
                                         <select onChange={(event) => handlePatternChange(event, trades.trades)}>
                                             <option value="">None</option>
                                             {patterns.map((pattern) => 
                                                 <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.label}</option>
                                             )}
                                         </select>
-                                        <input placeholder="Float" />
-                                        <input placeholder="Market Cap" />
-                                    </td>
-                                    <td>
-                                        <input placeholder="Float" />
-                                    </td>
-                                    <td>
-                                        <input placeholder="Market Cap" />
+                                        { trades.showDetails &&
+                                            <>
+                                                <label>Float (M)</label>
+                                                <input placeholder="Float" />
+                                                <label>Market Cap (M)</label>
+                                                <input placeholder="34" />
+                                                <label>Day Volume (M)</label>
+                                                <input placeholder="210" />
+                                                <label>Premarket Volume (M)</label>
+                                                <input placeholder="18" />
+                                            </>
+                                        }
                                     </td>
                                 </tr>
                                 { trades.showDetails === true && trades.trades.map(trade => 
-                                    <tr key={trade.id} class="child">
-                                        <td>{trade.time_in_nice} - {trade.time_out_nice}</td>
-                                        <td className={trade.profit_loss >= 0 ? 'green':'red'}>{trade.profit_loss.toFixed(2)}</td>
-                                        <td>-</td>
-                                        <td className="rt">{trade.side == 'SS' ? 'Short':'Long'}</td>
-                                    </tr> 
+                                    <>
+                                        <tr key={trade.id} class="child">
+                                            <td>{trade.time_in_nice} - {trade.time_out_nice}</td>
+                                            <td className={trade.profit_loss >= 0 ? 'green':'red'}>{trade.profit_loss.toFixed(2)}</td>
+                                            <td>-</td>
+                                            <td className="rt">{trade.side == 'SS' ? 'Short':'Long'}</td>
+                                        </tr> 
+                                    </>
                                 )}                                
                             </>
                             )}
