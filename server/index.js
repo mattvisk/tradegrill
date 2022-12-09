@@ -694,7 +694,7 @@ app.get("/deleteTrades", (req, res) => {
 /*  Chart Data FinnHUB 
 --------------------------------------------
 --------------------------------------------
-//Axios.get("http://localhost:3000/chart_btbt_finnhub_1min.json")
+//Axios.get("http://tradegrill.com:3000/chart_btbt_finnhub_1min.json")
 --------------------------------------------*/
 app.post("/viewChart2", (req, res) => {
     let key = "c5f4pu2ad3ib660qup10";
@@ -738,6 +738,45 @@ app.post("/companyprofile", (req, res) => {
     )})
     .catch(error => res.send({success : false , message: error.message}))
 })
+
+/* Get User Profile
+--------------------------------------------
+--------------------------------------------
+--------------------------------------------*/
+app.post('/user/profile', async (req, res) => {
+    const userId = req.session.user.id
+
+    const [user] = await database.execute("SELECT email, username, dashboard_date_from, dashboard_date_to FROM members WHERE id = ?", [userId])
+
+    if (user[0]) {
+        return res.status(200).send({
+            message: "User Profile",
+            data: user[0]
+        })
+    }
+
+    return res.status(500).send({
+        message: "Failed to get user profile. Please re-login."
+    })
+});
+
+/* Update date dashboard user
+--------------------------------------------
+--------------------------------------------
+--------------------------------------------*/
+app.post('/user/dashboard-date', async (req, res)=>{
+    const userId = req.session.user.id
+    const { from, to } = req.body
+
+    await database.execute(
+        `UPDATE members set dashboard_date_from = ?, dashboard_date_to = ? WHERE id = ?`, 
+        [from, to, userId]
+    )
+
+    return res.status(200).send({
+        message: "User dashboard date updated"
+    })
+});
   
 
 /* Server Listener

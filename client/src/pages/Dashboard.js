@@ -12,13 +12,6 @@ import 'material-icons/iconfont/material-icons.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard2 = ({user}) => {
-    
-    // Use Effect?
-    useEffect(() => {
-        getData()
-        getPatterns()
-    }, [])
-
     const history = useHistory();
 
     // State
@@ -36,6 +29,48 @@ const Dashboard2 = ({user}) => {
     let [dateFrom, setDateFrom] = useState(new Date('01-01-2020'));
     let [dateTo, setDateTo] = useState(new Date());
 
+    // Use Effect?
+    useEffect(() => {
+        getProfile().then(() => {
+            getData(true)
+            getPatterns()
+        })
+    }, [])
+
+    const getProfile = async () => {
+        return new Promise(async (resolve, reject) => {
+            const { status, data } = await Axios.post("http://"+window.location.hostname+":3001/user/profile", {
+            user
+            })
+
+            if (status === 200) {
+
+                if (data.data.dashboard_date_from) {
+                    setDateFrom(new Date(data.data.dashboard_date_from))
+                    setDateTo(new Date(data.data.dashboard_date_to))
+                } else {
+                    setDateFrom(new Date('01-01-2020'))
+                    setDateTo(new Date())
+                }
+
+            } else {
+                setDateFrom(new Date('01-01-2020'))
+                setDateTo(new Date())
+                toast.error(data.message, {
+                    position: "top-left",
+                    autoClose: 5000,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "colored",
+                });
+            }
+
+            resolve(status)
+        })
+    }
+
     const getPatterns = async () => {
         const { data } = await Axios.get("http://"+window.location.hostname+":3001/patterns")
         
@@ -52,7 +87,11 @@ const Dashboard2 = ({user}) => {
     }
 
     // Http Request: Get Trade Data
-    const getData = ()=>{
+    const getData = (isFirstTimeLoad = false)=>{
+
+        if (isFirstTimeLoad) {
+            return
+        }
 
         let search = window.location.search
         let paramsUrl = new URLSearchParams(search)
@@ -168,7 +207,28 @@ const Dashboard2 = ({user}) => {
 
     useEffect(() => {
         getData()
+        updateUserDashboardDate()
     }, [dateFrom, dateTo])
+
+    const updateUserDashboardDate = async () => {
+        const { status } = await Axios.post(`http://${window.location.hostname}:3001/user/dashboard-date`, {
+            user,
+            from: Format(dateFrom, 'yyyy-MM-dd'),
+            to: Format(dateTo, 'yyyy-MM-dd')
+        })
+        
+        if (status !== 200) {
+            toast.error('Failed update user dashboard date', {
+                position: "top-left",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "colored",
+            });
+        }
+    }
 
     const handlePatternChange = async (event, trades) => {
         const pattern_id = event.target.value
