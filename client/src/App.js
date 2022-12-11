@@ -44,7 +44,7 @@ function App() {
           <Route exact path="/register" component={Register} />
           <Route exact path="/login">{!user ? (<Login user={user} setUser={setUser} />) : (<Redirect to={afterLoginPage} />)}</Route>
           <Route exact path="/dashboard-old">{user ? <DashboardOld user={user} /> : <LoginRedirect />}</Route>
-          <Route exact path="/dashboard"><Dashboard user={user} /></Route>
+          <Route exact path="/dashboard">{user ? <Dashboard user={user} setUser={setUser} /> : <LoginRedirect />}</Route>
           <Route exact path="/trades/:urlSymbol/:urlDate/:urlDaysBack?/:urlDaysForward?"><Trade user={user} /></Route>
           <Route exact path="/statistics">{" "}{user ? <Statistics user={user} /> : <LoginRedirect />}{" "}</Route>
           <Route exact path="/profile">{" "}{user ? <Profile user={user} /> : <LoginRedirect />}{" "}</Route>

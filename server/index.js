@@ -10,9 +10,7 @@ const app = express();
 const multer = require('multer')
 const csvtojson = require('csvtojson');
 const Axios = require('axios');
-const getUnixTime = require('date-fns/getUnixTime')
 const _ = require('lodash');
-const statistics = require('./services/statistics');
 const mysql2 = require('mysql2/promise');
 const bluebird = require('bluebird');
 require('dotenv').config();
@@ -229,7 +227,7 @@ app.post('/login', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
     db.query(
-        "SELECT * FROM members WHERE username = ?",
+        "SELECT *, DATE_FORMAT(dashboard_date_from,'%m-%d-%Y') AS dashboard_date_from_nice FROM members WHERE username = ?",
         username,
         // Query Call Back
         (err, result) => {
@@ -438,17 +436,14 @@ const InsertCsvData = async (req, res) => {
 }
 
 
-/* Trades (temporary static memberid)
+/* Trades
 --------------------------------------------
 --------------------------------------------*/
 app.post('/get-trades', async (req, res) => {
-    
-    let pattern = []
-    
+    let pattern = []    
     if (req.body.pattern) {
         const tempPattern = req.body.pattern.split(',').join("','")
         const [patternSelected] = await database.execute(`SELECT * FROM patterns WHERE pattern_slug IN ('${tempPattern}')`)
-
         if (patternSelected && patternSelected.length > 0) {
             for (const patternObj of patternSelected) {
                 pattern.push(patternObj.id)
@@ -459,13 +454,15 @@ app.post('/get-trades', async (req, res) => {
     const symbolQuery = req.body.symbol ? 'AND symbol = ?' : '';
     const patternQuery = pattern.length > 0 ? `AND pattern_id IN ('${pattern.join("','")}')` : '';
     const sideQuery = req.body.side ? 'AND side = ?' : '';
+    const params =  [req.session.user.id, req.body.dateFrom, req.body.dateTo] // <-- temporarily hard coded member id
 
-    const params =  [1, req.body.dateFrom, req.body.dateTo] // <-- temporarily hard coded member id
-    
+    // Save filter date to profile
+    db.query("UPDATE members SET dashboard_date_from = ? WHERE id = ?", [req.body.dateFrom, req.session.user.id],(err, result) => {console.log(err)});
+    console.log('save date', req.body.dateFrom)
+
     if (req.body.symbol) {
         params.push(req.body.symbol)
     }
-
     if (req.body.side) {
         params.push(req.body.side)
     }
