@@ -3,13 +3,16 @@ import { useState, useEffect } from 'react';
 import Axios from 'axios';
 import UploadTrades from '../components/UploadTrades';
 import Format from 'date-fns/format';
-import { BarChart, Area, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart } from 'recharts';
 import { ToastContainer, toast } from 'react-toastify';
 import DatePicker from "react-datepicker";
 import Select from 'react-select';
+import DailyPL from './charts/DailyPL';
 import "react-datepicker/dist/react-datepicker.css";
 import 'material-icons/iconfont/material-icons.css';
 import 'react-toastify/dist/ReactToastify.css';
+import RunningPL from './charts/RunningPL';
+import TradesPL from './charts/TradesPL';
+import TableChart from './charts/TableChart';
 
 const Dashboard2 = ({user}) => {
     const history = useHistory();
@@ -28,6 +31,11 @@ const Dashboard2 = ({user}) => {
     // Data Filter
     let [dateFrom, setDateFrom] = useState(new Date('01-01-2020'));
     let [dateTo, setDateTo] = useState(new Date());
+
+    const [runningChartLoaded, setRunningChartLoaded] = useState(false)
+    const [dailyChartLoaded, setDailyChartLoaded] = useState(false)
+    const [tradesChartLoaded, setTradesChartLoaded] = useState(false)
+    const [tableChartLoaded, setTableChartLoaded] = useState(false)
 
     // Use Effect?
     useEffect(() => {
@@ -126,6 +134,22 @@ const Dashboard2 = ({user}) => {
             setTradesByDay(response.data.tradesByDay);
             setTradesByDaySymbol(response.data.tradesByDaySymbol);
             setProfitAllTime(response.data.profitAllTime);
+
+            setTimeout(() => {
+                setRunningChartLoaded(true)
+            }, 500)
+
+            setTimeout(() => {
+                setDailyChartLoaded(true)
+            }, 1500)
+
+            setTimeout(() => {
+                setTradesChartLoaded(true)
+            }, 2500)
+
+            setTimeout(() => {
+                setTableChartLoaded(true)
+            }, 3500)
         });
     }
 
@@ -391,90 +415,21 @@ const Dashboard2 = ({user}) => {
                     {/* ------------------------------------------- */}
                     <h3>Running P&L</h3>
                     <div className="new-chart"> 
-                        <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={tradesByDay} margin={margin} fontSize={12}>
-                                {/* <XAxis name="date" /> */}
-                                <CartesianGrid strokeDasharray="1" stroke="rgba(255,255,255,.15)" />
-                                <YAxis tickCount={8}/>
-                                <Tooltip />
-                                <Line dataKey="running_profit" stroke="#8884d8" dot={false} />
-                            </LineChart>
-                        </ResponsiveContainer>
+                        {runningChartLoaded && <RunningPL tradesByDay={tradesByDay} margin={margin} />}
                     </div>
                     {/* ------------------------------------------- */}
                     <h3>Daily P&L</h3>
                     <div className="new-chart">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={tradesByDay} margin={margin} fontSize={12}>
-                                <XAxis dataKey="symbol" />
-                                <YAxis/>
-                                <Tooltip />
-                                <Legend />
-                                <Bar name="Profit Loss" dataKey="profit_loss"> 
-                                    { tradesByDay.map((trade) => (
-                                        <Cell key={trade.id} fill={trade.profit_loss >= 0 ? '#0c9' : '#c22' }/>
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {dailyChartLoaded && <DailyPL tradesByDay={tradesByDay} margin={margin} />}
                     </div>
                     {/* ------------------------------------------- */}
                     <h3>Trades P&L</h3>
                     <div className="new-chart">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={trades} margin={margin} fontSize={12}>
-                                <YAxis tickCount={10} />
-                                <Tooltip />
-                                <Bar dataKey="profit_loss"> 
-                                    { trades.map((trade) => (
-                                        <Cell key={trade.id} fill={trade.profit_loss >= 0 ? '#0c9' : '#c22' }/>
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {tradesChartLoaded && <TradesPL trades={trades} margin={margin} />}
                     </div>
 
                     {/* ------------------------------------------- */}
-                    <table className="table-a">
-                        <thead>
-                            <tr>
-                                <th>Symbol</th>
-                                <th className="rt">Profit/Loss</th>
-                                <th className="rt">Trades</th>
-                                <th className="rt">Pattern</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            { tradesByDaySymbol && tradesByDaySymbol.slice(0).reverse().map((trades) => 
-                            <>
-                                <tr key={trades.id} className={trades.showDetails && 'open'}>
-                                    <td>
-                                        <Link to={`trades/${trades.symbol}/${trades.date}`}>{trades.symbol}</Link>
-                                        <br />
-                                        {trades.date}
-                                    </td>
-                                    <td className="rt">{trades.profit_loss.toFixed(2)}</td>
-                                    <td onClick={()=>{showDetails(trades.id)}} className="rt">{trades.trades.length} Open</td>
-                                    <td className="rt">
-                                        <select onChange={(event) => handlePatternChange(event, trades.trades)}>
-                                            <option value="">None</option>
-                                            {patterns.map((pattern) => 
-                                                <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.label}</option>
-                                            )}
-                                        </select>
-                                    </td>
-                                </tr>
-                                { trades.showDetails === true && trades.trades.map(trade => 
-                                    <tr key={trade.id} class="child">
-                                        <td className="">{trade.time_in_nice} - {trade.time_out_nice}</td>
-                                        <td className="rt">{trade.profit_loss.toFixed(2)}</td>
-                                        <td className="rt">{trade.side}</td>
-                                    </tr> 
-                                )}                                
-                            </>
-                            )}
-                        </tbody>
-                    </table> 
+                    {tableChartLoaded && <TableChart tradesByDaySymbol={tradesByDaySymbol} patterns={patterns} showDetails={showDetails} handlePatternChange={handlePatternChange} />}
                 </div>
             </div> 
         </div>
