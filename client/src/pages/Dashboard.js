@@ -20,9 +20,6 @@ const Dashboard2 = ({user}) => {
     }, [])
 
     const history = useHistory();
-
-    // State
-    // let [recentTrades, setRecentTrades ] = useState([]);
     const [symbolFilter, setSymbolFilter ] = useState(null);
     const [patternFilter, setPatternFilter ] = useState(null);
     const [sideFilter, setSideFilter ] = useState(null);
@@ -34,39 +31,12 @@ const Dashboard2 = ({user}) => {
     let [profitAllTime, setProfitAllTime] = useState(0);
     let [dateFrom, setDateFrom] = useState(new Date('01-01-2022'));
     let [dateTo, setDateTo] = useState(new Date());
-    const [mousePos, setMousePos] = useState({});
 
-
-    /* Get Mouse Coordinates
-    -------------------------------*/
-    useEffect(() => {
-        const handleMouseMove = (event) => {
-            setMousePos({ x: event.clientX, y: event.clientY });
-            console.log(event.clicentY);
-        };
-    
-        window.addEventListener('mousemove', handleMouseMove);
-    
-        return () => {
-          window.removeEventListener(
-            'mousemove',
-            handleMouseMove
-          );
-        };
-      }, []);
-
-
-
-
-
-
-
-
+    /* Get Patterns
+    ---------------------------*/
     const getPatterns = async () => {
-        const { data } = await Axios.get("http://"+window.location.hostname+":3001/patterns")
-        
-        const tempPattern = []
-        
+        const { data } = await Axios.get("http://"+window.location.hostname+":3001/patterns")        
+        const tempPattern = []        
         for (const pattern of data) {
             tempPattern.push({
                 id: pattern.id,
@@ -77,36 +47,30 @@ const Dashboard2 = ({user}) => {
         setPatterns(tempPattern)
     }
 
-    // Http Request: Get Trade Data
-    const getData = ()=>{
-
+    /* Get Trade Data
+    ---------------------------*/
+    const getData = () => {
         let search = window.location.search
         let paramsUrl = new URLSearchParams(search)
         const symbol = paramsUrl.get('symbol')
         const pattern = paramsUrl.get('pattern')
         const side = paramsUrl.get('side')
-
         setSymbolFilter(symbol)
         setPatternFilter(pattern)
         setSideFilter(side)
-
         const params = {
             'dateFrom': Format(dateFrom, 'yyyy-MM-dd'), 
             'dateTo': Format(dateTo, 'yyyy-MM-dd')
         }
-
         if (symbol && symbol !== '') {
             params.symbol = symbol
         }
-
         if (pattern && pattern !== '') {
             params.pattern = pattern
         }
-
         if (side && side !== '') {
             params.side = side
         }
-
         Axios.post("http://"+window.location.hostname+":3001/get-trades", params).then((response)=> {
             setTrades(response.data.trades);
             // setRecentTrades(response.data.trades.slice(-100));
@@ -116,7 +80,8 @@ const Dashboard2 = ({user}) => {
         });
     }
 
-    // Delete Request
+    /* Delete Trades
+    ---------------------------*/
     const deleteTrades = ()=>{
         Axios.get("http://"+window.location.hostname+":3001"+"/deleteTrades")
             .then((response)=> {
@@ -126,12 +91,12 @@ const Dashboard2 = ({user}) => {
         );
     }
 
+    /* Trade Data Filters
+    ---------------------------*/
     const handleSubmitFilter = (event) => {
-        event.preventDefault();
-        
+        event.preventDefault();        
         const symbol = event.target.symbol.value
         const side = event.target.side.value
-
         const filters = [{
             type: 'symbol',
             value: symbol
@@ -156,16 +121,19 @@ const Dashboard2 = ({user}) => {
                 search: query
             })
         }
-
         getData()
     }
 
+    /* Pattern Filter
+    ---------------------------*/
     const handlePatternFilter = (pattern) => {
         const data = []
         pattern.map((obj) => data.push(obj.value))
         setPatternFilter(data.join(','))
     }
 
+    /* Get Date Filter
+    ---------------------------*/
     const handleDateFilter = (type, value) => {
         if (type === 'date_from') {
             setDateFrom(value)
@@ -174,15 +142,14 @@ const Dashboard2 = ({user}) => {
         }
     }
 
+    /* IDK
+    ---------------------------*/
     const getDefaultValuePatternFilter = () => {
         const temp = []
-
         if (!patternFilter) {
             return temp
         }
-
         const filter = patternFilter.split(',')
-
         patterns.map((obj) => {
             if (filter.includes(obj.value)) {
                 temp.push({value: obj.value, label: obj.label})
@@ -193,10 +160,8 @@ const Dashboard2 = ({user}) => {
     }
     
 
-    useEffect(() => {
-        getData()
-    }, [dateFrom, dateTo])
-
+    /* Add Pattern
+    ---------------------------*/
     const handlePatternChange = async (event, trades) => {
         const pattern_id = event.target.value
         const trade_id = []

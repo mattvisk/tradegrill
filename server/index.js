@@ -440,21 +440,9 @@ const InsertCsvData = async (req, res) => {
 --------------------------------------------
 --------------------------------------------*/
 app.post('/get-trades', async (req, res) => {
-    let pattern = []    
-    if (req.body.pattern) {
-        const tempPattern = req.body.pattern.split(',').join("','")
-        const [patternSelected] = await database.execute(`SELECT * FROM patterns WHERE pattern_slug IN ('${tempPattern}')`)
-        if (patternSelected && patternSelected.length > 0) {
-            for (const patternObj of patternSelected) {
-                pattern.push(patternObj.id)
-            }
-        }
-    }
-
-    const symbolQuery = req.body.symbol ? 'AND symbol = ?' : '';
-    const patternQuery = pattern.length > 0 ? `AND pattern_id IN ('${pattern.join("','")}')` : '';
+    const symbol = req.body.symbol ? 'AND symbol = ?' : '';
     const sideQuery = req.body.side ? 'AND side = ?' : '';
-    const params =  [req.session.user.id, req.body.dateFrom, req.body.dateTo] // <-- temporarily hard coded member id
+    const params =  [req.session.user.id, req.body.dateFrom, req.body.dateTo]
 
     // Save filter date to profile
     db.query("UPDATE members SET dashboard_date_from = ? WHERE id = ?", [req.body.dateFrom, req.session.user.id],(err, result) => {console.log(err)});
@@ -477,7 +465,7 @@ app.post('/get-trades', async (req, res) => {
         WHERE member_id = ? 
         AND date_out >= ? 
         AND date_out <= ? 
-        ${symbolQuery}
+        ${symbol}
         ${patternQuery}
         ${sideQuery}
         ORDER BY time_out ASC`, params, (err, trades) => {
