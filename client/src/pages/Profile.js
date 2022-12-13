@@ -19,7 +19,7 @@ const Profile = ({user}) => {
                 <>
                     <p>{user.first_name} {user.last_name}</p>
                     <p>{user.username}</p>
-                    <button onClick={deleteTrades}>Delete Trades</button>
+                    {/* <button onClick={deleteTrades}>Delete Trades</button> */}
                 </>
             </div>
         </div>

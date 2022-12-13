@@ -201,7 +201,7 @@ const Dashboard2 = ({user}) => {
                 */}  
                 {/* ------------------ Upload / Delete ------------------ */}
                 <button><span class="material-icons">upload</span>Upload Trades <UploadTrades user={user} callback={getData} /></button>
-                <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>            
+                {/* <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>             */}
                 {/* ----------------------------------- Filters ----------------------------------- */}
                 <form className='lizard-form form-secondary' onSubmit={handleSubmitFilter}>
                     <hr />
@@ -261,8 +261,24 @@ const Dashboard2 = ({user}) => {
                             <p>{ profitAllTime }</p>
                         </section>
                         <section>
-                            <span>Trades</span>
-                            <p>{ trades.length }</p>
+                            <span>Stats</span>
+                            <p>Days { tradesByDay.length }</p>
+                            <p>Trades { trades.length }</p>
+                        </section>
+                        <section>
+                            <span>Winning Days</span>
+                            <p>{ tradesByDay.filter(trade => trade.profit_loss > 0).length }</p>
+                            <p>{ trades.filter(trade => trade.profit_loss > 0).length }</p>
+                        </section>
+                        <section>
+                            <span>Losing Days</span>
+                            <p>{ tradesByDay.filter(trade => trade.profit_loss < 0).length }</p>
+                            <p>{ trades.filter(trade => trade.profit_loss < 0).length }</p>
+                        </section>
+                        <section>
+                            <span>Win %</span>
+                            <p>{ Math.round(tradesByDay.filter(trade => trade.profit_loss > 0).length / tradesByDay.length * 100)}%</p>
+                            <p>{ Math.round(trades.filter(trade => trade.profit_loss > 0).length / trades.length * 100)}%</p>
                         </section>
                     </table>
                     
