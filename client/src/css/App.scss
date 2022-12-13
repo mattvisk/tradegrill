@@ -219,6 +219,10 @@ li {
       background-color:#0c9;
     }
   }
+  button {
+    width:100%;
+    margin:0 -8px;
+  }
 }
 .form-secondary {
   label {
@@ -464,12 +468,15 @@ li {
 .with-sidebar {
   display: flex;
   flex-wrap: wrap;
+  margin-top:2px;
 }
 .sidebar {
-  flex-basis: 320px;
+  border-radius:0 10px 0 0 ;
   flex-grow: 1;
   background:$HEADER_BG_MUTE;
+  // background:rgb(91, 46, 140);
   padding: 22px 14px;
+  margin-left:0;
   .logo {
       display:none;
       font-family:$font_1;

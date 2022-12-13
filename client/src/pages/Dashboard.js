@@ -154,7 +154,7 @@ const Dashboard2 = ({user}) => {
 
     /* Checkboxes
     -----------------------------*/
-    const [selectedPatterns, setSelected] = useState([0,1,2,3,4,5,6]);
+    const [selectedPatterns, setSelected] = useState([0,1,2,3,4,5,6,7]);
     function handleCheckbox(e) {
         if (selectedPatterns.includes(+e.target.value)) {
             setSelected(selectedPatterns.filter(option => option !== +e.target.value));
@@ -171,6 +171,10 @@ const Dashboard2 = ({user}) => {
             // Check All
             setSelected(patterns.map(pattern => pattern.id))
         }
+    }
+    function clickCheckbox(id) {
+        setSelected([id]);
+        getData();
     }
 
 
@@ -224,7 +228,7 @@ const Dashboard2 = ({user}) => {
 
                     {patterns.map(pattern => (
                         <div className="checkbox">
-                            <label key={pattern.id}>{pattern.pattern_name}</label>
+                            <label onClick={()=>clickCheckbox(pattern.id)} key={pattern.id}>{pattern.pattern_name}</label>
                             <input
                                 type="checkbox"
                                 value={pattern.id}
