@@ -12,19 +12,12 @@ import 'material-icons/iconfont/material-icons.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard2 = ({user}) => {
-    
-    // Use Effect?
-    useEffect(() => {
-        getData()
-        getPatterns()
-    }, [])
 
     const history = useHistory();
     const [symbolFilter, setSymbolFilter ] = useState(null);
     const [patternFilter, setPatternFilter ] = useState(null);
     const [sideFilter, setSideFilter ] = useState(null);
     const [patterns, setPatterns ] = useState([]);
-    const [scrollY, setScrollY] = useState();
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
     let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
@@ -32,20 +25,13 @@ const Dashboard2 = ({user}) => {
     let [dateFrom, setDateFrom] = useState(new Date('01-01-2022'));
     let [dateTo, setDateTo] = useState(new Date());
 
-    /* Get Patterns
+    /* Run Once
     ---------------------------*/
-    const getPatterns = async () => {
-        const { data } = await Axios.get("http://"+window.location.hostname+":3001/patterns")        
-        const tempPattern = []        
-        for (const pattern of data) {
-            tempPattern.push({
-                id: pattern.id,
-                value: pattern.pattern_slug,
-                label: pattern.pattern_name
-            })
-        }
-        setPatterns(tempPattern)
-    }
+    useEffect(() => {
+        getData()
+        getPatterns()
+    }, [])
+
 
     /* Get Trade Data
     ---------------------------*/
@@ -53,24 +39,17 @@ const Dashboard2 = ({user}) => {
         let search = window.location.search
         let paramsUrl = new URLSearchParams(search)
         const symbol = paramsUrl.get('symbol')
-        const pattern = paramsUrl.get('pattern')
+        // const patterns = paramsUrl.get('patterns')
         const side = paramsUrl.get('side')
         setSymbolFilter(symbol)
-        setPatternFilter(pattern)
         setSideFilter(side)
         const params = {
             'dateFrom': Format(dateFrom, 'yyyy-MM-dd'), 
-            'dateTo': Format(dateTo, 'yyyy-MM-dd')
+            'dateTo': Format(dateTo, 'yyyy-MM-dd'),
+            'patterns': selectedPatterns
         }
-        if (symbol && symbol !== '') {
-            params.symbol = symbol
-        }
-        if (pattern && pattern !== '') {
-            params.pattern = pattern
-        }
-        if (side && side !== '') {
-            params.side = side
-        }
+        if (symbol && symbol !== '') params.symbol = symbol;
+        if (side && side !== '') params.side = side;
         Axios.post("http://"+window.location.hostname+":3001/get-trades", params).then((response)=> {
             setTrades(response.data.trades);
             // setRecentTrades(response.data.trades.slice(-100));
@@ -85,7 +64,6 @@ const Dashboard2 = ({user}) => {
     const deleteTrades = ()=>{
         Axios.get("http://"+window.location.hostname+":3001"+"/deleteTrades")
             .then((response)=> {
-                console.log("Deleted Trades");
                 getData();
             }
         );
@@ -107,7 +85,6 @@ const Dashboard2 = ({user}) => {
             type: 'side',
             value: side
         }]
-
         if (symbol === '' && patternFilter === '' && side === '') {
             history.push({
                 pathname: '/dashboard'
@@ -115,21 +92,12 @@ const Dashboard2 = ({user}) => {
         } else {
             let query = `?`
             filters.map((filter) => filter.value !== '' && filter.value !== null ? query += `${filter.type}=${filter.value}&` : '')
-            console.log('query', query)
             history.push({
                 pathname: '/dashboard',
                 search: query
             })
         }
         getData()
-    }
-
-    /* Pattern Filter
-    ---------------------------*/
-    const handlePatternFilter = (pattern) => {
-        const data = []
-        pattern.map((obj) => data.push(obj.value))
-        setPatternFilter(data.join(','))
     }
 
     /* Get Date Filter
@@ -142,36 +110,16 @@ const Dashboard2 = ({user}) => {
         }
     }
 
-    /* IDK
+    /* Assign Pattern
     ---------------------------*/
-    const getDefaultValuePatternFilter = () => {
-        const temp = []
-        if (!patternFilter) {
-            return temp
-        }
-        const filter = patternFilter.split(',')
-        patterns.map((obj) => {
-            if (filter.includes(obj.value)) {
-                temp.push({value: obj.value, label: obj.label})
-            }
-        })
-        console.log('temp', temp)
-        return temp
-    }
-    
-
-    /* Add Pattern
-    ---------------------------*/
-    const handlePatternChange = async (event, trades) => {
+    const assignPattern = async (event, trades) => {
         const pattern_id = event.target.value
         const trade_id = []
         trades.map((trade) => trade_id.push(trade.id))
-
         const { status, data } = await Axios.post(`http://${window.location.hostname}:3001/update-trade`, {
             pattern_id,
             trade_id
         })
-
         if (status === 200) {
             toast.success(data.message, {
                 position: "top-left",
@@ -197,13 +145,45 @@ const Dashboard2 = ({user}) => {
 
     // Chart Styling
     let margin = {top:30,right:20,left:0,bottom:30};
-
     // Toggle Table Row
     const showDetails = id => setTradesByDaySymbol(tradesByDaySymbol.map(trade => trade.id === id ? {...trade, showDetails: !trade.showDetails} :  {...trade, showDetails: false} ));//trade));
 
+
+    /* Get Patterns
+    ---------------------------*/
+    const getPatterns = () => { 
+        Axios.get("http://"+window.location.hostname+":3001/patterns").then((response)=> {
+            setPatterns(response.data);
+        });
+    }
+
+    /* Checkboxes
+    -----------------------------*/
+    const [selectedPatterns, setSelected] = useState([]);
+    function handleCheckbox(e) {
+        if (selectedPatterns.includes(+e.target.value)) {
+            setSelected(selectedPatterns.filter(option => option !== +e.target.value));
+        } else {
+            setSelected([...selectedPatterns, +e.target.value]);
+        }
+        console.log(selectedPatterns);
+    }
+    function checkAll() {
+        if (selectedPatterns.length){
+            // Uncheck All
+            setSelected([]);
+        } else {
+            // Check All
+            setSelected(patterns.map(pattern => pattern.id))
+        }
+    }
+
+
+
     return (
         <div className="with-sidebar">
-            <div class="sidebar">
+            <div class="sidebar">                
+                {/* --------------------------- Sidebar Nav ----------------------------------- */}
                 <Link to="/" className='logo'>
                     TradeGrill
                 </Link>
@@ -215,11 +195,22 @@ const Dashboard2 = ({user}) => {
                 {/* <Link to="/journal"><span class="material-icons">upload</span>Upload Trades</Link> */}
                 <button><span class="material-icons">upload</span>Upload Trades <UploadTrades user={user} callback={getData} /></button>
                 <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>
-
-                <hr></hr>
-                
+                <hr />                
+                {/* --------------------------- Filters ----------------------------------- */}
                 <h2>Dashboard</h2>
                 <form className='lizard-form form-secondary' onSubmit={handleSubmitFilter}>
+                    {patterns.map(pattern => (
+                        <div className="checkbox">
+                            <label key={pattern.id}>{pattern.pattern_name}</label>
+                            <input
+                                type="checkbox"
+                                value={pattern.id}
+                                onChange={handleCheckbox}
+                                checked={selectedPatterns.includes(pattern.id)}
+                            />
+                        </div>
+                    ))}
+                    <button type="button" onClick={checkAll}>{selectedPatterns.length ? 'Clear' : 'Check All' }</button>
                     <label>Date</label>
                     <DatePicker
                         selected={dateFrom}
@@ -249,44 +240,13 @@ const Dashboard2 = ({user}) => {
                         <option value="SS" selected={sideFilter === "SS"}>Short</option>
                         <option value="B" selected={sideFilter === "B"}>Long</option>
                     </select>
-
-
-                    {/* This is awesome, but let's just use checkboxes for now --- keep this here though commented out */}
-                    <Select
-                        onChange={(pattern) => handlePatternFilter(pattern)}
-                        value={getDefaultValuePatternFilter()}
-                        name="pattern"
-                        className='mb-1'
-                        isMulti
-                        options={patterns}
-                        styles={{
-                            control: base => ({
-                                ...base,
-                                color: "black"
-                            }),
-                            menu: base => ({
-                                ...base,
-                                color: "black"
-                            })
-                        }}
-                    />
                     <button type="submit" className="btn">Search</button>
                 </form>
             </div>
+            {/* --------------------------- Not Sidebar ----------------------------------- */}
             <div className="not-sidebar">
                 <div className="inner">
                     <ToastContainer />
-                    {/* -------------------------------------------
-                    <h1>Dashboard</h1>
-
-                    <div>
-                    The mouse is at position{' '}
-                    <b>
-                        ({mousePos.x}, {mousePos.y})
-                    </b>
-                    </div> */}
-                    
-
                     <table className="viper-textbox">
                         <section>
                             <span>Profit</span>
@@ -366,7 +326,7 @@ const Dashboard2 = ({user}) => {
                                     <td onClick={()=>{showDetails(trades.id)}} className="rt">{trades.trades.length}</td>
                                     <td>
                                         { trades.showDetails && <label>Pattern</label> }
-                                        <select onChange={(event) => handlePatternChange(event, trades.trades)}>
+                                        <select onChange={(event) => assignPattern(event, trades.trades)}>
                                             <option value="">None</option>
                                             {patterns.map((pattern) => 
                                                 <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.label}</option>

@@ -444,17 +444,21 @@ app.post('/get-trades', async (req, res) => {
     const sideQuery = req.body.side ? 'AND side = ?' : '';
     const params =  [req.session.user.id, req.body.dateFrom, req.body.dateTo]
 
+    const symbolQuery = req.body.symbol ? 'AND symbol = ?' : '';
+    const patternsQuery = req.body.patterns.length ? `AND pattern_id IN ('${req.body.patterns.join("','")}')` : '';
+
     // Save filter date to profile
     db.query("UPDATE members SET dashboard_date_from = ? WHERE id = ?", [req.body.dateFrom, req.session.user.id],(err, result) => {console.log(err)});
-    console.log('save date', req.body.dateFrom)
 
+    // IDK
     if (req.body.symbol) {
         params.push(req.body.symbol)
     }
     if (req.body.side) {
         params.push(req.body.side)
-    }
+    }  
 
+    // Select Trades
     db.query(
         `SELECT *, 
         DATE_FORMAT(date_in,'%m-%d-%Y') AS date_in_nice, 
@@ -466,9 +470,12 @@ app.post('/get-trades', async (req, res) => {
         AND date_out >= ? 
         AND date_out <= ? 
         ${symbol}
-        ${patternQuery}
+        ${symbolQuery}
+        ${patternsQuery}
         ${sideQuery}
-        ORDER BY time_out ASC`, params, (err, trades) => {
+        ORDER BY time_out ASC`, 
+        params, 
+        (err, trades) => {
 
         /* Trades: By Ticker & Day 
         -----------------------------------------*/
