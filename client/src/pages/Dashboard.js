@@ -48,10 +48,18 @@ const Dashboard2 = ({user}) => {
         if (side && side !== '') params.side = side;
         Axios.post("http://"+window.location.hostname+":3001/get-trades", params).then((response)=> {
             setTrades(response.data.trades);
-            // setRecentTrades(response.data.trades.slice(-100));
             setTradesByDay(response.data.tradesByDay);
             setTradesByDaySymbol(response.data.tradesByDaySymbol);
             setProfitAllTime(response.data.profitAllTime);
+            // toast.success('Done!', {
+            //     position: "top-right",
+            //     autoClose: 1000,
+            //     hideProgressBar: true,
+            //     closeOnClick: true,
+            //     pauseOnHover: true,
+            //     draggable: true,
+            //     theme: "colored",
+            // });
         });
     }
 
@@ -173,6 +181,7 @@ const Dashboard2 = ({user}) => {
         }
     }
     function clickCheckbox(id) {
+        console.log(id);
         setSelected([id]);
         getData();
     }
