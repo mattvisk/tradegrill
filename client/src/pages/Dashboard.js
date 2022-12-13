@@ -6,13 +6,10 @@ import Format from 'date-fns/format';
 import { BarChart, Area, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart } from 'recharts';
 import { ToastContainer, toast } from 'react-toastify';
 import DatePicker from "react-datepicker";
-import Select from 'react-select';
 import "react-datepicker/dist/react-datepicker.css";
 import 'material-icons/iconfont/material-icons.css';
 import 'react-toastify/dist/ReactToastify.css';
-
 const Dashboard2 = ({user}) => {
-
     const history = useHistory();
     const [symbolFilter, setSymbolFilter ] = useState(null);
     const [patternFilter, setPatternFilter ] = useState(null);
@@ -31,7 +28,6 @@ const Dashboard2 = ({user}) => {
         getData()
         getPatterns()
     }, [])
-
 
     /* Get Trade Data
     ---------------------------*/
@@ -148,7 +144,6 @@ const Dashboard2 = ({user}) => {
     // Toggle Table Row
     const showDetails = id => setTradesByDaySymbol(tradesByDaySymbol.map(trade => trade.id === id ? {...trade, showDetails: !trade.showDetails} :  {...trade, showDetails: false} ));//trade));
 
-
     /* Get Patterns
     ---------------------------*/
     const getPatterns = () => { 
@@ -159,7 +154,7 @@ const Dashboard2 = ({user}) => {
 
     /* Checkboxes
     -----------------------------*/
-    const [selectedPatterns, setSelected] = useState([]);
+    const [selectedPatterns, setSelected] = useState([0,1,2,3,4,5,6]);
     function handleCheckbox(e) {
         if (selectedPatterns.includes(+e.target.value)) {
             setSelected(selectedPatterns.filter(option => option !== +e.target.value));
@@ -183,35 +178,20 @@ const Dashboard2 = ({user}) => {
     return (
         <div className="with-sidebar">
             <div class="sidebar">                
-                {/* --------------------------- Sidebar Nav ----------------------------------- */}
-                <Link to="/" className='logo'>
-                    TradeGrill
-                </Link>
+                {/* --------------------------- Sidebar Nav ----------------------------------- 
+                <Link to="/" className='logo'> TradeGrill</Link>
                 <NavLink to="/dashboard"><span class="material-icons">dashboard</span>Dashboard</NavLink>
                 <NavLink to="/calendar"><span class="material-icons">calendar_month</span>Calendar</NavLink>
                 <NavLink to="/all-trades"><span class="material-icons">bar_chart</span>Trades</NavLink>
                 <NavLink to="/journal"><span class="material-icons">school</span>Journal</NavLink>
                 <hr />
-                {/* <Link to="/journal"><span class="material-icons">upload</span>Upload Trades</Link> */}
+                */}  
+                {/* ------------------ Upload / Delete ------------------ */}
                 <button><span class="material-icons">upload</span>Upload Trades <UploadTrades user={user} callback={getData} /></button>
-                <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>
-                <hr />                
-                {/* --------------------------- Filters ----------------------------------- */}
-                <h2>Dashboard</h2>
+                <button onClick={deleteTrades}><span class="material-icons">delete</span>Delete Trades</button>            
+                {/* ----------------------------------- Filters ----------------------------------- */}
                 <form className='lizard-form form-secondary' onSubmit={handleSubmitFilter}>
-                    {patterns.map(pattern => (
-                        <div className="checkbox">
-                            <label key={pattern.id}>{pattern.pattern_name}</label>
-                            <input
-                                type="checkbox"
-                                value={pattern.id}
-                                onChange={handleCheckbox}
-                                checked={selectedPatterns.includes(pattern.id)}
-                            />
-                        </div>
-                    ))}
-                    <button type="button" onClick={checkAll}>{selectedPatterns.length ? 'Clear' : 'Check All' }</button>
-                    <label>Date</label>
+                    <hr />
                     <DatePicker
                         selected={dateFrom}
                         onChange={(date) => handleDateFilter('date_from', date)}
@@ -226,20 +206,35 @@ const Dashboard2 = ({user}) => {
                         startDate={dateFrom}
                         endDate={dateTo}
                     />
-                    <label>Symbol</label>
-                    <input class="uppercase"
-                        type="text"
-                        id="symbol"
-                        name="symbol"
-                        onChange={(e) => setSymbolFilter(e.target.value)}
-                        value={symbolFilter}
-                    />
-                    <label>Side</label>
                     <select name="side">
                         <option value="" selected={sideFilter === null || sideFilter === '' ? 'selected' : ''}>All</option>
                         <option value="SS" selected={sideFilter === "SS"}>Short</option>
                         <option value="B" selected={sideFilter === "B"}>Long</option>
                     </select>
+                    <input class="uppercase"
+                        type="text"
+                        id="symbol"
+                        name="symbol"
+                        placeholder='Symbol'
+                        onChange={(e) => setSymbolFilter(e.target.value)}
+                        value={symbolFilter}
+                    />
+
+                    <hr />
+
+                    {patterns.map(pattern => (
+                        <div className="checkbox">
+                            <label key={pattern.id}>{pattern.pattern_name}</label>
+                            <input
+                                type="checkbox"
+                                value={pattern.id}
+                                onChange={handleCheckbox}
+                                checked={selectedPatterns.includes(pattern.id)}
+                            />
+                        </div>
+                    ))}
+                    { patterns && <span onClick={checkAll}>{selectedPatterns.length ? 'Clear' : 'Check All' }</span> }
+
                     <button type="submit" className="btn">Search</button>
                 </form>
             </div>
@@ -327,9 +322,9 @@ const Dashboard2 = ({user}) => {
                                     <td>
                                         { trades.showDetails && <label>Pattern</label> }
                                         <select onChange={(event) => assignPattern(event, trades.trades)}>
-                                            <option value="">None</option>
+                                            <option value=""></option>
                                             {patterns.map((pattern) => 
-                                                <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.label}</option>
+                                                <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.pattern_name}</option>
                                             )}
                                         </select>
                                         { trades.showDetails &&
