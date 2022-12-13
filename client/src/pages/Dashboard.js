@@ -15,6 +15,7 @@ const Dashboard2 = ({user}) => {
     const [patternFilter, setPatternFilter ] = useState(null);
     const [sideFilter, setSideFilter ] = useState(null);
     const [patterns, setPatterns ] = useState([]);
+    const [selectedPatterns, setSelected] = useState([0,1,2,3,4,5,6,7]);
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
     let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
@@ -27,7 +28,8 @@ const Dashboard2 = ({user}) => {
     useEffect(() => {
         getData()
         getPatterns()
-    }, [])
+    }, [selectedPatterns])
+
 
     /* Get Trade Data
     ---------------------------*/
@@ -162,7 +164,6 @@ const Dashboard2 = ({user}) => {
 
     /* Checkboxes
     -----------------------------*/
-    const [selectedPatterns, setSelected] = useState([0,1,2,3,4,5,6,7]);
     function handleCheckbox(e) {
         if (selectedPatterns.includes(+e.target.value)) {
             setSelected(selectedPatterns.filter(option => option !== +e.target.value));
@@ -180,10 +181,8 @@ const Dashboard2 = ({user}) => {
             setSelected(patterns.map(pattern => pattern.id))
         }
     }
-    function clickCheckbox(id) {
-        console.log(id);
+    const clickCheckbox = (id) => {
         setSelected([id]);
-        getData();
     }
 
 
