@@ -231,6 +231,7 @@ const Dashboard2 = ({user}) => {
                         onChange={(e) => setSymbolFilter(e.target.value)}
                         value={symbolFilter}
                     />
+                    <button type="submit" className="btn">Save Filter</button>
 
                     <hr />
 
@@ -245,9 +246,8 @@ const Dashboard2 = ({user}) => {
                             />
                         </div>
                     ))}
-                    { patterns && <span onClick={checkAll}>{selectedPatterns.length ? 'Clear' : 'Check All' }</span> }
+                    { patterns && <span class="clear-btn" onClick={checkAll}>{selectedPatterns.length ? 'Clear' : 'Check All' }</span> }
 
-                    <button type="submit" className="btn">Search</button>
                 </form>
             </div>
             {/* --------------------------- Not Sidebar ----------------------------------- */}

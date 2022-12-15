@@ -469,13 +469,14 @@ app.post('/get-trades', async (req, res) => {
         WHERE member_id = ? 
         AND date_out >= ? 
         AND date_out <= ? 
-        ${symbol}
         ${symbolQuery}
         ${patternsQuery}
         ${sideQuery}
         ORDER BY time_out ASC`, 
         params, 
         (err, trades) => {
+
+            if(err) console.log(err);
 
         /* Trades: By Ticker & Day 
         -----------------------------------------*/
