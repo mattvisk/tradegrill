@@ -68,6 +68,22 @@ h3 {
 .uppercase {
   text-transform: uppercase;
 }
+.bubble {
+  display: inline-block;
+  border-radius:20px;
+  font-size:10px;
+  padding:0 4px;
+  margin-right:2px;
+  white-space: nowrap;
+  color:#444;
+  height:4px;
+  &.red {
+    background:red;
+  }
+  &.green {
+    background:#0c9;
+  }
+}
 
 /* Text
 ----------------------------*/
@@ -533,10 +549,12 @@ li {
 .not-sidebar {
   flex-basis: 0;
   flex-grow: 999;
+  position: relative;
   padding:0;
   .inner {
-      max-width:1100px;
       margin:60px auto 0;
+      padding: 0 80px;
+      max-width:1400px;
   }
 }
 

@@ -492,6 +492,8 @@ app.post('/get-trades', async (req, res) => {
             return { 
                 id: i,
                 date: trades[0].date_out_nice,
+                date_in: trades[0].date_in_nice,
+                date_out: trades[0].date_out_nice,
                 symbol: trades[0].symbol,
                 profit_loss: _.sumBy(trades, trade => trade.profit_loss),
                 running_profit: runningProfit,

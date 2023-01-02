@@ -15,7 +15,7 @@ const Dashboard2 = ({user}) => {
     const [patternFilter, setPatternFilter ] = useState(null);
     const [sideFilter, setSideFilter ] = useState(null);
     const [patterns, setPatterns ] = useState([]);
-    const [selectedPatterns, setSelected] = useState([0,1,2,3,4,5,6,7]);
+    const [selectedPatterns, setSelected] = useState([]);
     let [trades, setTrades ] = useState([]);
     let [tradesByDay, setTradesByDay ] = useState([]);
     let [tradesByDaySymbol, setTradesByDaySymbol ] = useState([]);
@@ -153,6 +153,7 @@ const Dashboard2 = ({user}) => {
     let margin = {top:30,right:20,left:0,bottom:30};
     // Toggle Table Row
     const showDetails = id => setTradesByDaySymbol(tradesByDaySymbol.map(trade => trade.id === id ? {...trade, showDetails: !trade.showDetails} :  {...trade, showDetails: false} ));//trade));
+
 
     /* Get Patterns
     ---------------------------*/
@@ -339,11 +340,12 @@ const Dashboard2 = ({user}) => {
                         <tbody>
                             { tradesByDaySymbol && tradesByDaySymbol.slice(0).reverse().map((trades) => 
                             <>
+                                {/* ----------------- Trades By Day Symbol ------------- */}
                                 <tr key={trades.id} className={trades.showDetails && 'open'}>
                                     <td onClick={()=>{showDetails(trades.id)}} >
                                         <Link to={`trades/${trades.symbol}/${trades.date}/8`}>{trades.symbol}</Link>
                                         <br />
-                                        {trades.date}
+                                        {`${trades.date_in} ${trades.date_out}`}
                                     </td>
                                     <td onClick={()=>{showDetails(trades.id)}}  className={trades.profit_loss >= 0 ? 'green':'red'}>{trades.profit_loss.toFixed(2)}</td>
                                     <td onClick={()=>{showDetails(trades.id)}} className="rt">{trades.trades.length}</td>
@@ -357,27 +359,36 @@ const Dashboard2 = ({user}) => {
                                         </select>
                                         { trades.showDetails &&
                                             <>
-                                                <label>Float (M)</label>
+                                                {/* <label>Float (M)</label>
                                                 <input placeholder="Float" />
                                                 <label>Market Cap (M)</label>
                                                 <input placeholder="34" />
                                                 <label>Day Volume (M)</label>
                                                 <input placeholder="210" />
                                                 <label>Premarket Volume (M)</label>
-                                                <input placeholder="18" />
+                                                <input placeholder="18" /> */}
                                             </>
                                         }
                                     </td>
                                 </tr>
+                                
+                                <tr>
+                                    <td colSpan={4}>
+                                        { trades.trades.map(trade => 
+                                            <span style={{width: Math.abs(trade.profit_loss / 5)}} className={trade.profit_loss >= 0 ? 'bubble green':'bubble red'}></span>
+                                        )}
+                                    </td>
+                                </tr> 
+
+
+                                {/* ----------------- Show Each Trade ------------- */}
                                 { trades.showDetails === true && trades.trades.map(trade => 
-                                    <>
-                                        <tr key={trade.id} class="child">
-                                            <td>{trade.time_in_nice} - {trade.time_out_nice}</td>
-                                            <td className={trade.profit_loss >= 0 ? 'green':'red'}>{trade.profit_loss.toFixed(2)}</td>
-                                            <td>-</td>
-                                            <td className="rt">{trade.side == 'SS' ? 'Short':'Long'}</td>
-                                        </tr> 
-                                    </>
+                                    <tr key={trade.id} class="child">
+                                        <td>{trade.time_in_nice} {trade.date_in_nice} - {trade.time_out_nice} {trade.date_out_nice} </td>
+                                        <td className={trade.profit_loss >= 0 ? 'green':'red'}>{trade.profit_loss.toFixed(2)}</td>
+                                        <td>-</td>
+                                        <td className="rt">{trade.side == 'SS' ? 'Short':'Long'}</td>
+                                    </tr> 
                                 )}                                
                             </>
                             )}
