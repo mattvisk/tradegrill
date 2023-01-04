@@ -137,10 +137,12 @@ app.post('/register', (req, res)=>{
 --------------------------------------------
 --------------------------------------------
 --------------------------------------------*/
-app.get('/patterns', async (req, res) => {
-    const [patterns] = await database.execute("SELECT * FROM patterns")
-    res.send(patterns)
-})
+app.get('/patterns', (req, res) => {
+    db.query("SELECT * FROM patterns", [], (err, result) => res.send(result))
+}) 
+
+
+
 
 /* Save Pattern Trade
 --------------------------------------------
@@ -151,15 +153,17 @@ app.post('/update-trade', async (req, res) => {
     const [pattern] = await database.execute("SELECT * FROM patterns WHERE id = ? LIMIT 1", [pattern_id])
 
     if (!pattern[0]) {
-        return res.status(404).send({
-            message: "Selected pattern not found"
-        })
+        await database.execute(
+            `UPDATE trades SET pattern_id = ? WHERE id IN ('${trade_id.join("','")}') AND member_id = ?`, 
+            ["", req.session.user.id]
+        )
+    } else {
+        await database.execute(
+            `UPDATE trades SET pattern_id = ? WHERE id IN ('${trade_id.join("','")}') AND member_id = ?`, 
+            [pattern[0].id, req.session.user.id]
+        )
     }
 
-    await database.execute(
-        `UPDATE trades SET pattern_id = ? WHERE id IN ('${trade_id.join("','")}') AND member_id = ?`, 
-        [pattern[0].id, req.session.user.id]
-    )
 
     return res.status(200).send({
         message: "Trade updated"
@@ -277,8 +281,7 @@ app.get("/logout", (req, res) => {
 app.post('/upload-csv',function(req, res) {
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
-            cb(null, 'uploads/csv')
-            // cb(null, '/home/tradegri/public_html/uploads/csv/')
+            cb(null, process.env.UPLOAD_PATH)
         },
         filename: function (req, file, cb) { 
             cb(null, Date.now() + '-' +file.originalname )
@@ -321,7 +324,7 @@ const InsertCsvData = async (req, res) => {
         const executions = await csvtojson({
             noheader:false,
             headers:csvColumns
-        }).fromFile("uploads/csv/" + req.file.filename)
+        }).fromFile(process.env.UPLOAD_PATH + req.file.filename)
 
         let dateShouldSkipped = []
         let totalImported = 0
@@ -714,9 +717,6 @@ app.post("/viewChart2", (req, res) => {
     .catch(error => res.send({success : false , message: error.message}))
 })
 
-
-
-
 /* Company Profile
 --------------------------------------------
 --------------------------------------------
@@ -733,7 +733,24 @@ app.post("/companyprofile", (req, res) => {
     )})
     .catch(error => res.send({success : false , message: error.message}))
 })
-  
+
+
+/* Polygon Data
+--------------------------------------------
+--------------------------------------------
+--------------------------------------------*/
+app.post("/max-reward", (req, res) => {
+    console.log(req.body);
+    let url = `https://api.polygon.io/v2/aggs/ticker/${req.body.symbol}/range/1/day/${req.body.date_in}/${req.body.date_out}?adjusted=true&sort=asc&limit=120&apiKey=MgtVLp56ofjl7rYmTzaXyIOkwKklqWr2`;
+    Axios.get(url).then(response => {
+        res.send({
+            success : true, 
+            data: response.data
+        }
+    )})
+    .catch(error => res.send({success : false , message: error.message}))
+})
+
 
 /* Server Listener
 --------------------------------------------------*/

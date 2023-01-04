@@ -65,6 +65,18 @@ const Dashboard2 = ({user}) => {
         });
     }
 
+    /* Get Trade Data
+    ---------------------------*/
+    const getMaxReward = (trades) => {
+        console.log(trades);
+        const symbol = trades.symbol;
+        const date_in = Format(new Date(trades.date_in), 'yyyy-MM-dd');
+        const date_out = Format(new Date(trades.date_out), 'yyyy-MM-dd');
+        Axios.post("http://"+window.location.hostname+":3001/max-reward", [symbol, date_in, date_out]).then((response)=> {
+            console.log(response.data);
+        });
+    }
+
     /* Delete Trades
     ---------------------------*/
     const deleteTrades = ()=>{
@@ -335,6 +347,7 @@ const Dashboard2 = ({user}) => {
                                 <th className="rt">Profit/Loss</th>
                                 <th className="rt">Trades</th>
                                 <th className="rt">Pattern</th>
+                                <th className="rt">Max Reward</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -342,34 +355,23 @@ const Dashboard2 = ({user}) => {
                             <>
                                 {/* ----------------- Trades By Day Symbol ------------- */}
                                 <tr key={trades.id} className={trades.showDetails && 'open'}>
+                                    
                                     <td onClick={()=>{showDetails(trades.id)}} >
-                                        <Link to={`trades/${trades.symbol}/${trades.date}/8`}>{trades.symbol}</Link>
+                                        <Link to={`trades/${trades.symbol}/${trades.date_out}/2`}>{trades.symbol}</Link>
                                         <br />
                                         {`${trades.date_in} ${trades.date_out}`}
                                     </td>
                                     <td onClick={()=>{showDetails(trades.id)}}  className={trades.profit_loss >= 0 ? 'green':'red'}>{trades.profit_loss.toFixed(2)}</td>
                                     <td onClick={()=>{showDetails(trades.id)}} className="rt">{trades.trades.length}</td>
                                     <td>
-                                        { trades.showDetails && <label>Pattern</label> }
                                         <select onChange={(event) => assignPattern(event, trades.trades)}>
                                             <option value=""></option>
                                             {patterns.map((pattern) => 
                                                 <option value={pattern.id} selected={trades.pattern_id === pattern.id}>{pattern.pattern_name}</option>
                                             )}
                                         </select>
-                                        { trades.showDetails &&
-                                            <>
-                                                {/* <label>Float (M)</label>
-                                                <input placeholder="Float" />
-                                                <label>Market Cap (M)</label>
-                                                <input placeholder="34" />
-                                                <label>Day Volume (M)</label>
-                                                <input placeholder="210" />
-                                                <label>Premarket Volume (M)</label>
-                                                <input placeholder="18" /> */}
-                                            </>
-                                        }
                                     </td>
+                                    <td><button onClick={()=>getMaxReward(trades)}>Get</button></td>
                                 </tr>
                                 
                                 <tr>
