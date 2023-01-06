@@ -200,6 +200,20 @@ const Dashboard2 = ({user}) => {
 
 
 
+    const CustomTooltip = ({ active, payload }) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="custom-tooltip">
+                    <p className="label">{payload[0].payload.date}</p>
+                    <p className="label">{payload[0].value.toFixed(2)}</p>
+                </div>
+            );
+        }    
+        return null;
+    };
+
+
+
     return (
         <div className="with-sidebar">
             <div class="sidebar">                
@@ -302,7 +316,7 @@ const Dashboard2 = ({user}) => {
                                 {/* <XAxis name="date" /> */}
                                 <CartesianGrid strokeDasharray="1" stroke="rgba(255,255,255,.08)" />
                                 <YAxis tickCount={10}/>
-                                <Tooltip />
+                                <Tooltip content={<CustomTooltip />} />
                                 <Line dataKey="running_profit" stroke="#8884d8" dot={false} />
                             </LineChart>
                         </ResponsiveContainer>
@@ -313,7 +327,8 @@ const Dashboard2 = ({user}) => {
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={tradesByDay} margin={margin} fontSize={12}>
                                 <YAxis tickCount={10} />
-                                <Tooltip />
+                                {/* <Tooltip /> */}
+                                <Tooltip content={<CustomTooltip />} />
                                 <CartesianGrid strokeDasharray="1" stroke="rgba(255,255,255,.08)" />
                                 <Bar name="Profit Loss" dataKey="profit_loss"> 
                                     { tradesByDay.map((trade) => (
@@ -329,7 +344,7 @@ const Dashboard2 = ({user}) => {
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={trades} margin={margin} fontSize={12}>
                                 <YAxis tickCount={10} />
-                                <Tooltip />
+                                <Tooltip content={<CustomTooltip />} />
                                 <Bar dataKey="profit_loss"> 
                                     { trades.map((trade) => (
                                         <Cell key={trade.id} fill={trade.profit_loss >= 0 ? '#0c9' : '#c22' }/>

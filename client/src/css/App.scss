@@ -486,8 +486,23 @@ li {
   // width:800px;
   margin:0 0 40px;
   border-radius:20px;
-  
 }
+.recharts-tooltip-wrapper {
+  border:none;
+  margin:0;
+  padding:0;
+}
+.custom-tooltip {
+  background:rgba(0,0,0,.9);
+  color:#eee;
+  margin:0;
+  border:4px solid rgb(50, 50, 50);
+  padding:10px;
+  p {
+    margin:0;
+  }
+}
+
 
 .with-sidebar {
   display: flex;
