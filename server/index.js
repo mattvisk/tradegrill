@@ -313,7 +313,6 @@ const formatDateTime = (d)=>{
     return mysqlDate;
 }
 const InsertCsvData = async (req, res) => {
-    await database.beginTransaction()
     try {
         // All Columns
         const userColumns = ["member_id"];
@@ -419,8 +418,6 @@ const InsertCsvData = async (req, res) => {
             
         }
 
-        await database.commit()
-
         res.send({
             message: "Upload Received!",
             data: {
@@ -431,7 +428,6 @@ const InsertCsvData = async (req, res) => {
     
     } catch (e) {
         console.error('Failed to upload CSV Error : ', e)
-        database.rollback()
         return res.send({
             message: "Upload failed"
         }, 500)
