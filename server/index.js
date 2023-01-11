@@ -155,7 +155,7 @@ app.post('/update-trade', async (req, res) => {
     if (!pattern[0]) {
         await database.execute(
             `UPDATE trades SET pattern_id = ? WHERE id IN ('${trade_id.join("','")}') AND member_id = ?`, 
-            ["", req.session.user.id]
+            [null, req.session.user.id]
         )
     } else {
         await database.execute(
